@@ -14,11 +14,11 @@ import {
 } from 'react-native';
 import { GameState } from '../gameEngine';
 import { colors, fonts } from '../theme';
-import TeamAvatar from '../components/TeamAvatar';
 import FlipCard from '../components/FlipCard';
 import CardBack from '../components/CardBack';
 import PlayerRevealCard from '../components/PlayerRevealCard';
 import PitchBackground from '../components/PitchBackground';
+import TeamStatusBar from '../components/TeamStatusBar';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const CARD_HEIGHT = Math.max(340, Math.min(560, SCREEN_HEIGHT * 0.46));
@@ -96,7 +96,6 @@ export default function BiddingScreen({
   if (!currentPlayer || turn === null) return null;
 
   const turnTeam = teams[turn];
-  const turnAccent = turn === 1 ? colors.team1 : colors.team2;
   const bidderTeam = currentBidder !== null ? teams[currentBidder] : null;
   const bidderAccent = currentBidder === 1 ? colors.team1 : colors.team2;
 
@@ -153,6 +152,8 @@ export default function BiddingScreen({
     >
       <PitchBackground />
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <TeamStatusBar teams={teams} turn={turn} />
+
         <FlipCard
           flipKey={currentPlayer.id}
           height={CARD_HEIGHT}
@@ -173,23 +174,6 @@ export default function BiddingScreen({
                   held by {bidderTeam.name}
                 </Text>
               )}
-            </View>
-
-            <View style={styles.turnStatusWrap}>
-              <View
-                style={[
-                  styles.turnPill,
-                  { backgroundColor: `${turnAccent}20`, borderColor: `${turnAccent}70` },
-                ]}
-              >
-                <View style={[styles.turnDot, { backgroundColor: turnAccent }]} />
-                <TeamAvatar avatarId={turnTeam.avatar} size={16} />
-                <Text style={[styles.turnPillText, { color: turnAccent }]}>
-                  <Text style={{ fontWeight: '800' }}>{turnTeam.name}</Text>
-                  <Text style={{ fontWeight: '600' }}>'s turn</Text>
-                </Text>
-              </View>
-              <Text style={styles.turnBudgetText}>{turnTeam.budget} coins available</Text>
             </View>
 
             <Animated.View
@@ -236,15 +220,6 @@ export default function BiddingScreen({
             <Pressable style={[styles.actionButton, styles.passButton]} onPress={onPass}>
               <Text style={styles.passButtonText}>{passLabel}</Text>
             </Pressable>
-
-            <View style={styles.budgetsRow}>
-              <Text style={[styles.budgetChip, { color: colors.team1 }]}>
-                {teams[1].name}: {teams[1].budget}
-              </Text>
-              <Text style={[styles.budgetChip, { color: colors.team2 }]}>
-                {teams[2].name}: {teams[2].budget}
-              </Text>
-            </View>
           </>
         )}
       </ScrollView>
@@ -271,19 +246,6 @@ const styles = StyleSheet.create({
   bidLabel: { color: '#c9dcd2', fontSize: 12 },
   bidValue: { color: colors.textInverse, fontSize: 28, fontFamily: fonts.display },
   bidderText: { fontSize: 12, fontWeight: '700', marginTop: 2 },
-  turnStatusWrap: { alignItems: 'center', marginBottom: 12 },
-  turnPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    borderWidth: 1,
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-  },
-  turnDot: { width: 6, height: 6, borderRadius: 3 },
-  turnPillText: { fontSize: 13 },
-  turnBudgetText: { color: '#c9dcd2', fontSize: 12, marginTop: 4 },
   actionButton: {
     borderRadius: 12,
     paddingVertical: 13,
@@ -322,11 +284,4 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   passButtonText: { fontSize: 14, fontWeight: '700', color: colors.textInverse },
-  budgetsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 'auto',
-    paddingTop: 12,
-  },
-  budgetChip: { fontWeight: '700', fontSize: 13 },
 });
