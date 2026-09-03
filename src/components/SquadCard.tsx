@@ -29,7 +29,7 @@ function Row({
           {!hideRatings && <Text style={styles.overall}>{player.overall}</Text>}
         </>
       ) : (
-        <Text style={styles.empty}>—</Text>
+        <Text style={styles.empty}>-</Text>
       )}
     </View>
   );

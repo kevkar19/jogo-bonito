@@ -121,7 +121,7 @@ export default function AuctionResultScreen({
           <Text style={styles.amount}>for {result.amount} coins</Text>
           {!result.contested && (
             <Text style={styles.note}>
-              No competing bid — the other squad's {POSITION_LABELS[result.player.position]} slot
+              No competing bid - the other squad's {POSITION_LABELS[result.player.position]} slot
               was already filled.
             </Text>
           )}

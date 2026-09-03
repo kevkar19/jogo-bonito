@@ -141,9 +141,9 @@ export default function BiddingScreen({
 
   let passLabel: string;
   if (bidderTeam) {
-    passLabel = `Pass — ${bidderTeam.name} wins for ${currentBid}`;
+    passLabel = `Pass - ${bidderTeam.name} wins for ${currentBid}`;
   } else if (openingPassed) {
-    passLabel = `Pass — ${currentPlayer.name} will be skipped & replaced`;
+    passLabel = `Pass - ${currentPlayer.name} will be skipped & replaced`;
   } else {
     passLabel = 'Pass on this player';
   }
