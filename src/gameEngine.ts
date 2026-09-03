@@ -1,0 +1,263 @@
+import { generatePlayerPool, generateReplacementPlayer } from './generator';
+import {
+  GameConfig,
+  Player,
+  Team,
+  TeamId,
+  assignToSquad,
+  emptySquad,
+  openSlotsForPosition,
+} from './types';
+
+export type Phase = 'setup' | 'ready' | 'bidding' | 'auctionResult' | 'suspense' | 'gameOver';
+
+export type AuctionResultInfo =
+  | { type: 'won'; player: Player; winner: TeamId; amount: number; contested: boolean }
+  | { type: 'skipped'; player: Player; replacement: Player };
+
+export interface GameState {
+  phase: Phase;
+  config: GameConfig;
+  pool: Player[];
+  currentPlayer: Player | null;
+  teams: Record<TeamId, Team>;
+  startingBidder: TeamId;
+  currentBid: number;
+  currentBidder: TeamId | null;
+  turn: TeamId | null;
+  /** Whether the first team to act this auction has already passed without placing a bid. */
+  openingPassed: boolean;
+  lastResult: AuctionResultInfo | null;
+}
+
+export type GameAction =
+  | { type: 'START_GAME'; config: GameConfig }
+  | { type: 'REVEAL_NEXT' }
+  | { type: 'RAISE' }
+  | { type: 'BID_CUSTOM'; amount: number }
+  | { type: 'PASS' }
+  | { type: 'CONTINUE_AFTER_RESULT' }
+  | { type: 'FINISH_SUSPENSE' }
+  | { type: 'RESET' };
+
+function otherTeam(team: TeamId): TeamId {
+  return team === 1 ? 2 : 1;
+}
+
+function eligibleTeams(teams: Record<TeamId, Team>, player: Player): TeamId[] {
+  const result: TeamId[] = [];
+  ([1, 2] as TeamId[]).forEach((id) => {
+    if (openSlotsForPosition(teams[id].squad, player.position) > 0) {
+      result.push(id);
+    }
+  });
+  return result;
+}
+
+export function initialState(): GameState {
+  return {
+    phase: 'setup',
+    config: {
+      startingBudget: 100,
+      bidIncrement: 5,
+      team1Name: 'Player 1',
+      team2Name: 'Player 2',
+      team1Avatar: 'flame',
+      team2Avatar: 'shield',
+      hideRatings: false,
+    },
+    pool: [],
+    currentPlayer: null,
+    teams: {
+      1: { name: 'Player 1', budget: 100, squad: emptySquad(), avatar: 'flame' },
+      2: { name: 'Player 2', budget: 100, squad: emptySquad(), avatar: 'shield' },
+    },
+    startingBidder: 1,
+    currentBid: 0,
+    currentBidder: null,
+    turn: null,
+    openingPassed: false,
+    lastResult: null,
+  };
+}
+
+function resolveWin(
+  state: GameState,
+  winner: TeamId,
+  amount: number,
+  contested: boolean
+): GameState {
+  const player = state.currentPlayer!;
+  const winningTeam = state.teams[winner];
+  const clampedAmount = Math.min(amount, winningTeam.budget);
+
+  const updatedTeam: Team = {
+    ...winningTeam,
+    budget: winningTeam.budget - clampedAmount,
+    squad: assignToSquad(winningTeam.squad, player),
+  };
+
+  return {
+    ...state,
+    phase: 'auctionResult',
+    teams: { ...state.teams, [winner]: updatedTeam },
+    currentPlayer: null,
+    currentBid: 0,
+    currentBidder: null,
+    turn: null,
+    openingPassed: false,
+    startingBidder: otherTeam(state.startingBidder),
+    lastResult: { type: 'won', player, winner, amount: clampedAmount, contested },
+  };
+}
+
+/** Both sides declined to bid at all: discard the player and queue a same-position replacement. */
+function resolveSkip(state: GameState): GameState {
+  const player = state.currentPlayer!;
+  const replacement = generateReplacementPlayer(player.position);
+  return {
+    ...state,
+    phase: 'auctionResult',
+    currentPlayer: null,
+    currentBid: 0,
+    currentBidder: null,
+    turn: null,
+    openingPassed: false,
+    startingBidder: otherTeam(state.startingBidder),
+    pool: [replacement, ...state.pool],
+    lastResult: { type: 'skipped', player, replacement },
+  };
+}
+
+/**
+ * Pops the next player from the pool and either starts a contested auction or
+ * auto-resolves an uncontested one. Shared by REVEAL_NEXT and by START_GAME
+ * (which reveals round 1 immediately, skipping the "ready" tap screen).
+ */
+function revealNext(state: GameState): GameState {
+  if (state.pool.length === 0) {
+    return { ...state, phase: 'suspense' };
+  }
+  const [next, ...rest] = state.pool;
+  const eligible = eligibleTeams(state.teams, next);
+
+  if (eligible.length === 0) {
+    // Defensive: shouldn't happen given the pool matches squad needs exactly.
+    return revealNext({ ...state, pool: rest });
+  }
+
+  if (eligible.length === 1) {
+    return resolveWin(
+      { ...state, pool: rest, currentPlayer: next },
+      eligible[0],
+      state.config.bidIncrement,
+      false
+    );
+  }
+
+  return {
+    ...state,
+    pool: rest,
+    currentPlayer: next,
+    phase: 'bidding',
+    currentBid: 0,
+    currentBidder: null,
+    turn: state.startingBidder,
+    openingPassed: false,
+  };
+}
+
+export function gameReducer(state: GameState, action: GameAction): GameState {
+  switch (action.type) {
+    case 'START_GAME': {
+      const { config } = action;
+      const freshState: GameState = {
+        ...initialState(),
+        config,
+        pool: generatePlayerPool(),
+        teams: {
+          1: {
+            name: config.team1Name || 'Player 1',
+            budget: config.startingBudget,
+            squad: emptySquad(),
+            avatar: config.team1Avatar,
+          },
+          2: {
+            name: config.team2Name || 'Player 2',
+            budget: config.startingBudget,
+            squad: emptySquad(),
+            avatar: config.team2Avatar,
+          },
+        },
+      };
+      // Round 1 skips the "ready" tap screen and reveals immediately.
+      return revealNext(freshState);
+    }
+
+    case 'REVEAL_NEXT':
+      return revealNext(state);
+
+    case 'RAISE': {
+      if (state.phase !== 'bidding' || state.turn === null) return state;
+      const raiser = state.turn;
+      const newBid = state.currentBid + state.config.bidIncrement;
+      if (newBid > state.teams[raiser].budget) return state; // can't afford, ignore
+      return {
+        ...state,
+        currentBid: newBid,
+        currentBidder: raiser,
+        turn: otherTeam(raiser),
+      };
+    }
+
+    case 'BID_CUSTOM': {
+      if (state.phase !== 'bidding' || state.turn === null) return state;
+      const raiser = state.turn;
+      const amount = Math.floor(action.amount);
+      const minValid = state.currentBidder === null ? state.config.bidIncrement : state.currentBid + 1;
+      if (!Number.isFinite(amount) || amount < minValid || amount > state.teams[raiser].budget) {
+        return state; // invalid, ignore (UI is expected to validate before dispatching)
+      }
+      return {
+        ...state,
+        currentBid: amount,
+        currentBidder: raiser,
+        turn: otherTeam(raiser),
+      };
+    }
+
+    case 'PASS': {
+      if (state.phase !== 'bidding' || state.turn === null) return state;
+
+      if (state.currentBidder !== null) {
+        return resolveWin(state, state.currentBidder, state.currentBid, true);
+      }
+
+      // No bid placed yet this auction.
+      if (!state.openingPassed) {
+        return { ...state, turn: otherTeam(state.turn), openingPassed: true };
+      }
+
+      // Both sides passed without ever bidding - skip and replace.
+      return resolveSkip(state);
+    }
+
+    case 'CONTINUE_AFTER_RESULT': {
+      if (state.pool.length === 0) {
+        return { ...state, phase: 'suspense', lastResult: null };
+      }
+      return { ...state, phase: 'ready', lastResult: null };
+    }
+
+    case 'FINISH_SUSPENSE': {
+      if (state.phase !== 'suspense') return state;
+      return { ...state, phase: 'gameOver' };
+    }
+
+    case 'RESET':
+      return initialState();
+
+    default:
+      return state;
+  }
+}
