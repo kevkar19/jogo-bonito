@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
 import { GameState } from '../gameEngine';
 import { POSITION_LABELS } from '../types';
-import { colors } from '../theme';
+import { colors, fonts } from '../theme';
 import PlayerAvatar from '../components/PlayerAvatar';
 import FlipCard from '../components/FlipCard';
 import CardBack from '../components/CardBack';
 import PlayerRevealCard from '../components/PlayerRevealCard';
 import TierBadge from '../components/TierBadge';
+import PitchBackground from '../components/PitchBackground';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const FRESH_REVEAL_HEIGHT = Math.max(300, Math.min(480, SCREEN_HEIGHT * 0.4));
@@ -45,6 +46,7 @@ export default function AuctionResultScreen({
   if (result.type === 'skipped') {
     return (
       <View style={styles.container}>
+        <PitchBackground />
         <Text style={styles.skippedHeadline}>Nobody wanted them!</Text>
         <View style={styles.playerCard}>
           <PlayerAvatar player={result.player} size={64} />
@@ -99,6 +101,7 @@ export default function AuctionResultScreen({
 
   return (
     <View style={styles.container}>
+      <PitchBackground />
       <Text style={[styles.winnerName, { color: accent }]}>{winnerTeam.name} wins!</Text>
 
       {isFreshReveal ? (
@@ -140,8 +143,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  winnerName: { fontSize: 26, fontWeight: '800', marginBottom: 20 },
-  skippedHeadline: { fontSize: 24, fontWeight: '800', color: colors.textInverse, marginBottom: 16 },
+  winnerName: { fontSize: 30, fontFamily: fonts.display, marginBottom: 20 },
+  skippedHeadline: { fontSize: 28, fontFamily: fonts.display, color: colors.textInverse, marginBottom: 16 },
   replacementLabel: {
     color: colors.accent,
     fontWeight: '700',
@@ -188,5 +191,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 12,
   },
-  buttonText: { fontSize: 16, fontWeight: '800', color: colors.bg },
+  buttonText: { fontSize: 18, fontFamily: fonts.display, letterSpacing: 1, color: colors.bg },
 });

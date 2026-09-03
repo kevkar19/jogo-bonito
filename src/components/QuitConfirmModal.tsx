@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/build/Ionicons';
 import { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors } from '../theme';
+import { colors, fonts } from '../theme';
 
 export default function QuitConfirmModal({
   onCancel,
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 14,
   },
-  title: { fontSize: 19, fontWeight: '800', color: colors.text, marginBottom: 8 },
+  title: { fontSize: 22, fontFamily: fonts.display, color: colors.text, marginBottom: 8 },
   body: {
     fontSize: 13.5,
     color: colors.textMuted,

@@ -116,8 +116,14 @@ const ICONS: Record<Position, { name: string; overall: number }[]> = {
   ],
 };
 
-/** Chance that any freshly generated player is swapped for an unused Icon of the same position. */
-const ICON_CHANCE = 1 / 6;
+/**
+ * Chance that any freshly generated player is swapped for an unused Icon of
+ * the same position. Kept high (not 100%) since every Icon has a real photo
+ * and the position pools are large (12-28 each) relative to the 2-4 needed
+ * per game - a small residual chance still leaves room for a fictional
+ * "filler" player without making them a common sight.
+ */
+const ICON_CHANCE = 0.9;
 
 let usedNames: Set<string>;
 let usedIconNames: Set<string>;

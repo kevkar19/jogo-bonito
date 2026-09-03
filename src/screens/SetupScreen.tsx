@@ -11,8 +11,9 @@ import {
   View,
 } from 'react-native';
 import { AvatarId, GameConfig } from '../types';
-import { colors } from '../theme';
+import { colors, fonts } from '../theme';
 import AvatarPicker from '../components/AvatarPicker';
+import PitchBackground from '../components/PitchBackground';
 
 export default function SetupScreen({
   onStart,
@@ -66,6 +67,7 @@ export default function SetupScreen({
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
+      <PitchBackground />
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Jogo Bonito</Text>
         <Text style={styles.subtitle}>Soccer Squad Auction</Text>
@@ -140,16 +142,16 @@ export default function SetupScreen({
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
+  flex: { flex: 1, backgroundColor: colors.bg },
   container: {
     padding: 20,
     paddingTop: 60,
-    backgroundColor: colors.bg,
     flexGrow: 1,
   },
   title: {
-    fontSize: 30,
-    fontWeight: '800',
+    fontSize: 36,
+    fontFamily: fonts.display,
+    letterSpacing: 1,
     color: colors.textInverse,
     textAlign: 'center',
   },
@@ -205,5 +207,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 8,
   },
-  buttonText: { fontSize: 16, fontWeight: '800', color: colors.bg },
+  buttonText: { fontSize: 18, fontFamily: fonts.display, letterSpacing: 1, color: colors.bg },
 });

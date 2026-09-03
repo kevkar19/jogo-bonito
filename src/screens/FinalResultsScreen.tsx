@@ -1,9 +1,10 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { GameState } from '../gameEngine';
 import { squadTotalOverall } from '../types';
-import { colors } from '../theme';
+import { colors, fonts } from '../theme';
 import SquadCard from '../components/SquadCard';
 import Confetti from '../components/Confetti';
+import PitchBackground from '../components/PitchBackground';
 
 export default function FinalResultsScreen({
   state,
@@ -20,6 +21,7 @@ export default function FinalResultsScreen({
 
   return (
     <View style={styles.flex}>
+      <PitchBackground />
       {winner && <Confetti side={winner === 1 ? 'left' : 'right'} />}
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.eyebrow}>Final Results</Text>
@@ -72,8 +74,9 @@ const styles = StyleSheet.create({
   },
   headline: {
     color: colors.textInverse,
-    fontSize: 26,
-    fontWeight: '800',
+    fontSize: 32,
+    fontFamily: fonts.display,
+    letterSpacing: 0.5,
     textAlign: 'center',
   },
   subheadline: {
@@ -90,5 +93,5 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: 'center',
   },
-  buttonText: { fontSize: 16, fontWeight: '800', color: colors.bg },
+  buttonText: { fontSize: 18, fontFamily: fonts.display, letterSpacing: 1, color: colors.bg },
 });

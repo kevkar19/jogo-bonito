@@ -39,6 +39,7 @@ export default function App() {
   // path, which left every icon glyph blank on the deployed web build.
   const [fontsLoaded] = useFonts({
     ionicons: require('./assets/fonts/Ionicons.ttf'),
+    Anton_400Regular: require('./assets/fonts/Anton-Regular.ttf'),
   });
 
   // A game is actively in progress during these phases - that's when

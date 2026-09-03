@@ -1,7 +1,8 @@
 import Ionicons from '@expo/vector-icons/build/Ionicons';
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
-import { colors } from '../theme';
+import { colors, fonts } from '../theme';
+import PitchBackground from '../components/PitchBackground';
 
 const DURATION_MS = 3000;
 const MESSAGES = ['Tallying up the squads…', 'Adding up the ratings…', 'And the winner is…'];
@@ -9,6 +10,7 @@ const MESSAGES = ['Tallying up the squads…', 'Adding up the ratings…', 'And 
 export default function SuspenseScreen({ onFinish }: { onFinish: () => void }) {
   const spin = useRef(new Animated.Value(0)).current;
   const pulse = useRef(new Animated.Value(1)).current;
+  const glowPulse = useRef(new Animated.Value(0.6)).current;
   const [messageIndex, setMessageIndex] = useState(0);
 
   useEffect(() => {
@@ -36,8 +38,25 @@ export default function SuspenseScreen({ onFinish }: { onFinish: () => void }) {
         }),
       ])
     );
+    const glowLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(glowPulse, {
+          toValue: 1,
+          duration: 900,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(glowPulse, {
+          toValue: 0.6,
+          duration: 900,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ])
+    );
     spinLoop.start();
     pulseLoop.start();
+    glowLoop.start();
 
     const messageInterval = setInterval(() => {
       setMessageIndex((i) => Math.min(i + 1, MESSAGES.length - 1));
@@ -48,6 +67,7 @@ export default function SuspenseScreen({ onFinish }: { onFinish: () => void }) {
     return () => {
       spinLoop.stop();
       pulseLoop.stop();
+      glowLoop.stop();
       clearInterval(messageInterval);
       clearTimeout(finishTimer);
     };
@@ -58,6 +78,8 @@ export default function SuspenseScreen({ onFinish }: { onFinish: () => void }) {
 
   return (
     <View style={styles.container}>
+      <PitchBackground />
+      <Animated.View style={[styles.glow, { opacity: glowPulse }]} />
       <Animated.View style={{ transform: [{ rotate }, { scale: pulse }] }}>
         <Ionicons name="trophy" size={96} color={colors.accent} />
       </Animated.View>
@@ -74,11 +96,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 24,
   },
+  glow: {
+    position: 'absolute',
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: 'rgba(255,204,51,0.14)',
+  },
   message: {
     color: colors.textInverse,
-    fontSize: 17,
-    fontWeight: '700',
-    marginTop: 28,
+    fontSize: 19,
+    fontFamily: fonts.display,
+    letterSpacing: 0.3,
+    marginTop: 30,
     textAlign: 'center',
   },
 });

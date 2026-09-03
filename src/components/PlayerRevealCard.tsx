@@ -4,7 +4,7 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 import { Player, POSITION_LABELS, getRatingTier } from '../types';
 import { POSITION_AVATAR } from '../avatars';
 import { ICON_PHOTOS } from '../iconPhotos';
-import { colors, TIER_COLORS } from '../theme';
+import { colors, fonts, TIER_COLORS } from '../theme';
 import TierBadge from './TierBadge';
 
 /**
@@ -19,48 +19,61 @@ export default function PlayerRevealCard({ player }: { player: Player }) {
   const tierColor = TIER_COLORS[tier];
 
   return (
-    <View style={[styles.card, { borderColor: tierColor }]}>
-      {photo ? (
-        <Image source={photo} style={styles.photo} resizeMode="cover" />
-      ) : (
-        <View style={[styles.photo, styles.fallback, { backgroundColor: posSpec.color }]}>
-          <Ionicons name={posSpec.icon} size={110} color="rgba(255,255,255,0.35)" />
-        </View>
-      )}
-
-      <View style={styles.topRow}>
-        <View style={[styles.positionBadge, { backgroundColor: colors.pitch }]}>
-          <Text style={styles.positionBadgeText}>{player.position}</Text>
-        </View>
-        {player.isIcon && (
-          <View style={styles.iconBadge}>
-            <Text style={styles.iconBadgeText}>⭐ ICON</Text>
+    // Shadow lives on this outer wrapper - a View with overflow:hidden (needed
+    // on the inner card to clip the photo/gradient to rounded corners) would
+    // also clip its own shadow on native, so the glow has to sit outside it.
+    <View style={[styles.shadowWrap, { shadowColor: tierColor }]}>
+      <View style={[styles.card, { borderColor: tierColor }]}>
+        {photo ? (
+          <Image source={photo} style={styles.photo} resizeMode="cover" />
+        ) : (
+          <View style={[styles.photo, styles.fallback, { backgroundColor: posSpec.color }]}>
+            <Ionicons name={posSpec.icon} size={110} color="rgba(255,255,255,0.35)" />
           </View>
         )}
-      </View>
 
-      <LinearGradient
-        colors={['transparent', 'rgba(0,0,0,0.55)', 'rgba(0,0,0,0.92)']}
-        locations={[0, 0.45, 1]}
-        style={styles.scrim}
-      >
-        <Text style={styles.name} numberOfLines={1}>
-          {player.name}
-        </Text>
-        <Text style={styles.positionLabel}>{POSITION_LABELS[player.position]}</Text>
-        <View style={styles.statRow}>
-          <View style={styles.ovrWrap}>
-            <Text style={styles.ovrValue}>{player.overall}</Text>
-            <Text style={styles.ovrLabel}>OVR</Text>
+        <View style={styles.topRow}>
+          <View style={[styles.positionBadge, { backgroundColor: colors.pitch }]}>
+            <Text style={styles.positionBadgeText}>{player.position}</Text>
           </View>
-          <TierBadge overall={player.overall} size="lg" />
+          {player.isIcon && (
+            <View style={styles.iconBadge}>
+              <Text style={styles.iconBadgeText}>⭐ ICON</Text>
+            </View>
+          )}
         </View>
-      </LinearGradient>
+
+        <LinearGradient
+          colors={['transparent', 'rgba(0,0,0,0.6)', 'rgba(0,0,0,0.94)']}
+          locations={[0, 0.45, 1]}
+          style={styles.scrim}
+        >
+          <Text style={styles.name} numberOfLines={1}>
+            {player.name}
+          </Text>
+          <Text style={styles.positionLabel}>{POSITION_LABELS[player.position]}</Text>
+          <View style={styles.statRow}>
+            <View style={styles.ovrWrap}>
+              <Text style={styles.ovrValue}>{player.overall}</Text>
+              <Text style={styles.ovrLabel}>OVR</Text>
+            </View>
+            <TierBadge overall={player.overall} size="lg" />
+          </View>
+        </LinearGradient>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  shadowWrap: {
+    flex: 1,
+    borderRadius: 22,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 20,
+    elevation: 14,
+  },
   card: {
     flex: 1,
     borderRadius: 22,
@@ -106,17 +119,18 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    paddingTop: 60,
+    paddingTop: 70,
     paddingBottom: 16,
     paddingHorizontal: 18,
   },
   name: {
     color: colors.textInverse,
-    fontSize: 26,
-    fontWeight: '800',
-    textShadowColor: 'rgba(0,0,0,0.6)',
+    fontSize: 28,
+    fontFamily: fonts.display,
+    letterSpacing: 0.5,
+    textShadowColor: 'rgba(0,0,0,0.7)',
     textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    textShadowRadius: 5,
   },
   positionLabel: {
     color: 'rgba(255,255,255,0.85)',
@@ -126,6 +140,6 @@ const styles = StyleSheet.create({
   },
   statRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   ovrWrap: { flexDirection: 'row', alignItems: 'baseline', gap: 4 },
-  ovrValue: { color: colors.accent, fontSize: 32, fontWeight: '900' },
+  ovrValue: { color: colors.accent, fontSize: 36, fontFamily: fonts.display },
   ovrLabel: { color: 'rgba(255,255,255,0.75)', fontSize: 12, fontWeight: '700' },
 });

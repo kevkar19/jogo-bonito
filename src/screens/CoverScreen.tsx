@@ -1,9 +1,8 @@
 import Ionicons from '@expo/vector-icons/build/Ionicons';
 import { Animated, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { colors } from '../theme';
+import { colors, fonts } from '../theme';
 import { useFadeIn } from '../hooks/useFadeIn';
-
-const STRIPE_COUNT = 16;
+import PitchBackground from '../components/PitchBackground';
 
 export default function CoverScreen({ onStart }: { onStart: () => void }) {
   const ballFade = useFadeIn(0, { rise: 10 });
@@ -16,11 +15,7 @@ export default function CoverScreen({ onStart }: { onStart: () => void }) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.stripes} pointerEvents="none">
-        {Array.from({ length: STRIPE_COUNT }).map((_, i) => (
-          <View key={i} style={[styles.stripe, i % 2 === 0 ? styles.stripeA : styles.stripeB]} />
-        ))}
-      </View>
+      <PitchBackground />
 
       <Ionicons
         name="football"
@@ -89,17 +84,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.bg,
   },
-  stripes: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    flexDirection: 'column',
-  },
-  stripe: { flex: 1 },
-  stripeA: { backgroundColor: colors.bg },
-  stripeB: { backgroundColor: '#0d4633' },
   watermark: {
     position: 'absolute',
     alignSelf: 'center',
@@ -143,7 +127,7 @@ const styles = StyleSheet.create({
   },
   crestStar: { marginBottom: 2 },
   crestEst: { color: colors.accent, fontSize: 10, fontWeight: '700', letterSpacing: 2 },
-  crestYear: { color: colors.textInverse, fontSize: 22, fontWeight: '900', marginTop: 1 },
+  crestYear: { color: colors.textInverse, fontSize: 24, fontFamily: fonts.display, marginTop: 1 },
   bornToPlay: {
     color: '#c9dcd2',
     fontSize: 15,
@@ -172,8 +156,8 @@ const styles = StyleSheet.create({
   },
   signature: {
     color: colors.accent,
-    fontSize: 25,
-    fontWeight: '900',
+    fontSize: 30,
+    fontFamily: fonts.display,
     letterSpacing: 3,
   },
   buttonWrap: { width: '100%' },
@@ -183,5 +167,5 @@ const styles = StyleSheet.create({
     paddingVertical: 17,
     alignItems: 'center',
   },
-  buttonText: { fontSize: 16, fontWeight: '800', color: colors.bg, letterSpacing: 0.5 },
+  buttonText: { fontSize: 18, fontFamily: fonts.display, color: colors.bg, letterSpacing: 1 },
 });

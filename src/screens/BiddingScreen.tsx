@@ -13,11 +13,12 @@ import {
   View,
 } from 'react-native';
 import { GameState } from '../gameEngine';
-import { colors } from '../theme';
+import { colors, fonts } from '../theme';
 import TeamAvatar from '../components/TeamAvatar';
 import FlipCard from '../components/FlipCard';
 import CardBack from '../components/CardBack';
 import PlayerRevealCard from '../components/PlayerRevealCard';
+import PitchBackground from '../components/PitchBackground';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const CARD_HEIGHT = Math.max(340, Math.min(560, SCREEN_HEIGHT * 0.46));
@@ -150,6 +151,7 @@ export default function BiddingScreen({
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
+      <PitchBackground />
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <FlipCard
           flipKey={currentPlayer.id}
@@ -251,10 +253,9 @@ export default function BiddingScreen({
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
+  flex: { flex: 1, backgroundColor: colors.bg },
   container: {
     flexGrow: 1,
-    backgroundColor: colors.bg,
     padding: 18,
     paddingTop: 14,
     paddingBottom: 14,
@@ -268,7 +269,7 @@ const styles = StyleSheet.create({
   },
   bidInfo: { alignItems: 'center', marginTop: 12, marginBottom: 9 },
   bidLabel: { color: '#c9dcd2', fontSize: 12 },
-  bidValue: { color: colors.textInverse, fontSize: 25, fontWeight: '800' },
+  bidValue: { color: colors.textInverse, fontSize: 28, fontFamily: fonts.display },
   bidderText: { fontSize: 12, fontWeight: '700', marginTop: 2 },
   turnStatusWrap: { alignItems: 'center', marginBottom: 12 },
   turnPill: {
