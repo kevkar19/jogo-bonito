@@ -21,6 +21,9 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "experiments": {
+      "baseUrl": "/jogo-bonito"
+    },
     "plugins": [
       "expo-audio",
       "expo-font"
