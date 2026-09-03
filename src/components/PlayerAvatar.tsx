@@ -1,11 +1,13 @@
 import Ionicons from '@expo/vector-icons/build/Ionicons';
-import { StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import { Player } from '../types';
 import { ICON_AVATAR, POSITION_AVATAR } from '../avatars';
+import { ICON_PHOTOS } from '../iconPhotos';
 
 export default function PlayerAvatar({ player, size = 64 }: { player: Player; size?: number }) {
   const spec = player.isIcon ? ICON_AVATAR : POSITION_AVATAR[player.position];
   const backgroundColor = player.isIcon ? '#3a2f0b' : `${spec.color}22`;
+  const photo = player.isIcon ? ICON_PHOTOS[player.name] : undefined;
 
   return (
     <View
@@ -21,7 +23,15 @@ export default function PlayerAvatar({ player, size = 64 }: { player: Player; si
         },
       ]}
     >
-      <Ionicons name={spec.icon} size={size * 0.5} color={spec.color} />
+      {photo ? (
+        <Image
+          source={photo}
+          style={{ width: size, height: size, borderRadius: size / 2 }}
+          resizeMode="cover"
+        />
+      ) : (
+        <Ionicons name={spec.icon} size={size * 0.5} color={spec.color} />
+      )}
     </View>
   );
 }
@@ -30,5 +40,6 @@ const styles = StyleSheet.create({
   circle: {
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
 });

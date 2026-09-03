@@ -53,6 +53,8 @@ const ICONS: Record<Position, { name: string; overall: number }[]> = {
     { name: 'Gerard Pique', overall: 90 },
     { name: 'Carles Puyol', overall: 91 },
     { name: 'William Saliba', overall: 86 },
+    { name: 'Harry Maguire', overall: 83 },
+    { name: 'John Arne Riise', overall: 85 },
   ],
   CM: [
     { name: 'Zinedine Zidane', overall: 96 },
@@ -81,6 +83,8 @@ const ICONS: Record<Position, { name: string; overall: number }[]> = {
     { name: 'Sergio Busquets', overall: 90 },
     { name: 'Pedri', overall: 88 },
     { name: 'Declan Rice', overall: 87 },
+    { name: 'Joshua Kimmich', overall: 90 },
+    { name: 'Sam', overall: 99 },
   ],
   ST: [
     { name: 'Pele', overall: 98 },
@@ -107,6 +111,8 @@ const ICONS: Record<Position, { name: string; overall: number }[]> = {
     { name: 'Son Heung-min', overall: 89 },
     { name: 'Cole Palmer', overall: 87 },
     { name: 'Marcus Rashford', overall: 85 },
+    { name: 'Ian Rush', overall: 92 },
+    { name: 'Kevin Karengera', overall: 100 },
   ],
 };
 

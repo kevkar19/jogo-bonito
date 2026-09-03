@@ -4,6 +4,7 @@ import { Player, Team, squadTotalOverall } from '../types';
 import { colors } from '../theme';
 import TeamAvatar from './TeamAvatar';
 import TierBadge from './TierBadge';
+import PlayerAvatar from './PlayerAvatar';
 
 function Row({
   label,
@@ -19,6 +20,7 @@ function Row({
       <Text style={styles.posLabel}>{label}</Text>
       {player ? (
         <>
+          <PlayerAvatar player={player} size={18} />
           <Text style={styles.playerName} numberOfLines={1}>
             {player.name}
           </Text>
