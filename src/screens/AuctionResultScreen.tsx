@@ -1,3 +1,4 @@
+import Ionicons from '@expo/vector-icons/build/Ionicons';
 import { useEffect, useState } from 'react';
 import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
 import { GameState } from '../gameEngine';
@@ -30,7 +31,6 @@ export default function AuctionResultScreen({
   onContinue: () => void;
 }) {
   const result = state.lastResult;
-  const hideRatings = state.config.hideRatings;
   // Only an uncontested win is a genuinely new reveal (it never went through
   // BiddingScreen's flip) - track that case's flip completion here.
   const isFreshReveal = result?.type === 'won' && !result.contested;
@@ -60,18 +60,16 @@ export default function AuctionResultScreen({
           {POSITION_LABELS[result.player.position]} takes their place in the pool.
         </Text>
 
-        <Text style={styles.replacementLabel}>Replacement</Text>
+        <Text style={styles.replacementLabel}>Up Next</Text>
         <View style={styles.playerCard}>
-          {result.replacement.isIcon && (
-            <View style={styles.iconBadge}>
-              <Text style={styles.iconBadgeText}>⭐ ICON</Text>
-            </View>
-          )}
-          <PlayerAvatar player={result.replacement} size={64} />
-          <Text style={styles.playerName}>{result.replacement.name}</Text>
+          {/* Identity, photo, and rating stay hidden here - this player still
+              gets its own suspense flip in BiddingScreen, so showing who it
+              is (or their rating) now would spoil that reveal. */}
+          <View style={styles.mysteryAvatar}>
+            <Ionicons name="help" size={30} color={colors.textMuted} />
+          </View>
+          <Text style={styles.playerName}>???</Text>
           <Text style={styles.playerPosition}>{POSITION_LABELS[result.replacement.position]}</Text>
-          {/* Hasn't had its own reveal yet - respects the setting like the squad view does. */}
-          <RatingLine overall={result.replacement.overall} hideRatings={hideRatings} />
         </View>
 
         <Pressable style={styles.button} onPress={onContinue}>
@@ -171,6 +169,16 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   iconBadgeText: { color: '#3a2f0b', fontWeight: '800', fontSize: 11 },
+  mysteryAvatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 2,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceAlt,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   playerName: { fontSize: 20, fontWeight: '800', color: colors.text, marginTop: 10 },
   playerPosition: { fontSize: 13, color: colors.textMuted, marginBottom: 8 },
   ratingLine: { alignItems: 'center', gap: 6 },
