@@ -21,7 +21,10 @@ import PitchBackground from '../components/PitchBackground';
 import TeamStatusBar from '../components/TeamStatusBar';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
-const CARD_HEIGHT = Math.max(340, Math.min(560, SCREEN_HEIGHT * 0.46));
+// Sized to leave just enough room below for the status bar, bid info, and
+// action buttons to all fit without scrolling on a typical viewport.
+const CHROME_HEIGHT = 360;
+const CARD_HEIGHT = Math.max(260, Math.min(460, SCREEN_HEIGHT - CHROME_HEIGHT));
 
 export default function BiddingScreen({
   state,
@@ -231,38 +234,38 @@ const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.bg },
   container: {
     flexGrow: 1,
-    padding: 18,
-    paddingTop: 14,
-    paddingBottom: 14,
+    padding: 16,
+    paddingTop: 10,
+    paddingBottom: 10,
   },
   revealingText: {
     color: '#c9dcd2',
     textAlign: 'center',
-    marginTop: 14,
+    marginTop: 10,
     fontSize: 14,
     fontStyle: 'italic',
   },
-  bidInfo: { alignItems: 'center', marginTop: 12, marginBottom: 9 },
+  bidInfo: { alignItems: 'center', marginTop: 6, marginBottom: 6 },
   bidLabel: { color: '#c9dcd2', fontSize: 12 },
-  bidValue: { color: colors.textInverse, fontSize: 28, fontFamily: fonts.display },
-  bidderText: { fontSize: 12, fontWeight: '700', marginTop: 2 },
+  bidValue: { color: colors.textInverse, fontSize: 24, fontFamily: fonts.display },
+  bidderText: { fontSize: 12, fontWeight: '700', marginTop: 1 },
   actionButton: {
     borderRadius: 12,
-    paddingVertical: 13,
+    paddingVertical: 11,
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   raiseButton: { backgroundColor: colors.accent },
   confirmButton: { backgroundColor: '#e8823c' },
   disabledButton: { backgroundColor: colors.disabled },
   actionButtonText: { fontSize: 15, fontWeight: '800', color: colors.bg },
-  customBidRow: { flexDirection: 'row', gap: 8, marginBottom: 5 },
+  customBidRow: { flexDirection: 'row', gap: 8, marginBottom: 4 },
   customBidInput: {
     flex: 1,
     backgroundColor: colors.surface,
     borderRadius: 10,
     paddingHorizontal: 13,
-    paddingVertical: 11,
+    paddingVertical: 9,
     fontSize: 14,
     color: colors.text,
     borderWidth: 1.5,
@@ -276,12 +279,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   customBidButtonText: { color: colors.textInverse, fontWeight: '800', fontSize: 14 },
-  customBidErrorText: { color: '#ffb4b4', fontSize: 11, marginBottom: 6, fontWeight: '600' },
+  customBidErrorText: { color: '#ffb4b4', fontSize: 11, marginBottom: 4, fontWeight: '600' },
   passButton: {
     backgroundColor: 'transparent',
     borderWidth: 2,
     borderColor: colors.textInverse,
-    marginTop: 5,
+    marginTop: 2,
   },
   passButtonText: { fontSize: 14, fontWeight: '700', color: colors.textInverse },
 });

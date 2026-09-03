@@ -115,25 +115,25 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     gap: 10,
-    marginBottom: 14,
+    marginBottom: 10,
   },
   card: {
     flex: 1,
-    borderRadius: 18,
+    borderRadius: 16,
     borderWidth: 2,
-    paddingVertical: 12,
+    paddingVertical: 8,
     paddingHorizontal: 12,
     alignItems: 'center',
   },
   turnChip: {
     position: 'absolute',
-    top: -10,
+    top: -9,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     borderRadius: 10,
     paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingVertical: 2,
   },
   turnDot: {
     width: 5,
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginTop: 6,
+    marginTop: 4,
     maxWidth: '100%',
   },
   name: {
@@ -160,14 +160,13 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   budget: {
-    fontSize: 34,
+    fontSize: 26,
     fontFamily: fonts.display,
-    marginTop: 4,
-    lineHeight: 38,
+    marginTop: 2,
+    lineHeight: 30,
   },
   coinsLabel: {
     color: colors.textMuted,
-    fontSize: 11,
-    marginTop: 1,
+    fontSize: 10,
   },
 });
