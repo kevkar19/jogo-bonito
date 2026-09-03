@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
 import { GameState } from '../gameEngine';
 import { POSITION_LABELS } from '../types';
 import { colors } from '../theme';
 import PlayerAvatar from '../components/PlayerAvatar';
 import FlipCard from '../components/FlipCard';
 import CardBack from '../components/CardBack';
+import PlayerRevealCard from '../components/PlayerRevealCard';
 import TierBadge from '../components/TierBadge';
 
-const CARD_HEIGHT = 220;
+const SCREEN_HEIGHT = Dimensions.get('window').height;
+const FRESH_REVEAL_HEIGHT = Math.max(300, Math.min(480, SCREEN_HEIGHT * 0.4));
 
 function RatingLine({ overall, hideRatings }: { overall: number; hideRatings: boolean }) {
   return (
@@ -80,7 +82,7 @@ export default function AuctionResultScreen({
   const winnerTeam = state.teams[result.winner];
   const accent = result.winner === 1 ? colors.team1 : colors.team2;
 
-  const cardContent = (
+  const compactCard = (
     <View style={styles.playerCard}>
       {result.player.isIcon && (
         <View style={styles.iconBadge}>
@@ -90,8 +92,7 @@ export default function AuctionResultScreen({
       <PlayerAvatar player={result.player} size={64} />
       <Text style={styles.playerName}>{result.player.name}</Text>
       <Text style={styles.playerPosition}>{POSITION_LABELS[result.player.position]}</Text>
-      {/* Already had its reveal in BiddingScreen (or is revealing right now via the flip
-          card below for an uncontested win), so the rating always shows here. */}
+      {/* Already had its reveal in BiddingScreen, so the rating always shows here. */}
       <RatingLine overall={result.player.overall} hideRatings={false} />
     </View>
   );
@@ -103,13 +104,13 @@ export default function AuctionResultScreen({
       {isFreshReveal ? (
         <FlipCard
           flipKey={result.player.id}
-          height={CARD_HEIGHT}
+          height={FRESH_REVEAL_HEIGHT}
           back={<CardBack />}
-          front={cardContent}
+          front={<PlayerRevealCard player={result.player} />}
           onFlipped={() => setRevealed(true)}
         />
       ) : (
-        cardContent
+        compactCard
       )}
 
       {revealed && (

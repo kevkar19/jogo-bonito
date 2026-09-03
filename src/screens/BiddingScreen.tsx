@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   Animated,
+  Dimensions,
   Easing,
   KeyboardAvoidingView,
   Platform,
@@ -12,15 +13,14 @@ import {
   View,
 } from 'react-native';
 import { GameState } from '../gameEngine';
-import { POSITION_LABELS } from '../types';
 import { colors } from '../theme';
-import PlayerAvatar from '../components/PlayerAvatar';
 import TeamAvatar from '../components/TeamAvatar';
 import FlipCard from '../components/FlipCard';
 import CardBack from '../components/CardBack';
-import TierBadge from '../components/TierBadge';
+import PlayerRevealCard from '../components/PlayerRevealCard';
 
-const CARD_HEIGHT = 230;
+const SCREEN_HEIGHT = Dimensions.get('window').height;
+const CARD_HEIGHT = Math.max(340, Math.min(560, SCREEN_HEIGHT * 0.46));
 
 export default function BiddingScreen({
   state,
@@ -151,37 +151,12 @@ export default function BiddingScreen({
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        <Text style={styles.eyebrow}>Player up for auction</Text>
-
         <FlipCard
           flipKey={currentPlayer.id}
           height={CARD_HEIGHT}
           onFlipped={() => setRevealed(true)}
           back={<CardBack />}
-          front={
-            <View style={styles.playerCard}>
-              {currentPlayer.isIcon && (
-                <View style={styles.iconBadge}>
-                  <Text style={styles.iconBadgeText}>⭐ ICON</Text>
-                </View>
-              )}
-              <PlayerAvatar player={currentPlayer} size={52} />
-              <View style={styles.positionBadge}>
-                <Text style={styles.positionBadgeText}>{currentPlayer.position}</Text>
-              </View>
-              <Text style={styles.playerName}>{currentPlayer.name}</Text>
-              <Text style={styles.playerPosition}>{POSITION_LABELS[currentPlayer.position]}</Text>
-              {/* The reveal always shows the exact rating, even with "Hide overall ratings"
-                  on - it only hides once the player lands in a squad. */}
-              <View style={styles.overallBadge}>
-                <Text style={styles.overallValue}>{currentPlayer.overall}</Text>
-                <Text style={styles.overallLabel}>OVR</Text>
-              </View>
-              <View style={styles.tierRow}>
-                <TierBadge overall={currentPlayer.overall} size="sm" />
-              </View>
-            </View>
-          }
+          front={<PlayerRevealCard player={currentPlayer} />}
         />
 
         {!revealed ? (
@@ -280,48 +255,10 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     backgroundColor: colors.bg,
-    padding: 20,
-    paddingTop: 24,
+    padding: 18,
+    paddingTop: 14,
     paddingBottom: 14,
   },
-  eyebrow: {
-    color: colors.accent,
-    textAlign: 'center',
-    fontWeight: '700',
-    fontSize: 12,
-    marginBottom: 8,
-  },
-  playerCard: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-  },
-  iconBadge: {
-    backgroundColor: '#d4af37',
-    borderRadius: 20,
-    paddingHorizontal: 11,
-    paddingVertical: 3,
-    marginBottom: 6,
-  },
-  iconBadgeText: { color: '#3a2f0b', fontWeight: '800', fontSize: 10 },
-  tierRow: { marginTop: 6 },
-  positionBadge: {
-    backgroundColor: colors.pitch,
-    borderRadius: 20,
-    paddingHorizontal: 13,
-    paddingVertical: 4,
-    marginTop: 7,
-    marginBottom: 6,
-  },
-  positionBadgeText: { color: colors.textInverse, fontWeight: '700', fontSize: 12 },
-  playerName: { fontSize: 19, fontWeight: '800', color: colors.text },
-  playerPosition: { fontSize: 12, color: colors.textMuted, marginBottom: 5 },
-  overallBadge: { alignItems: 'center' },
-  overallValue: { fontSize: 28, fontWeight: '900', color: colors.pitch },
-  overallLabel: { fontSize: 10, fontWeight: '700', color: colors.textMuted },
   revealingText: {
     color: '#c9dcd2',
     textAlign: 'center',
