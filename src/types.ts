@@ -81,22 +81,22 @@ export interface FormationOption {
 export const FORMATIONS: Record<FormationId, FormationOption> = {
   classic: {
     label: 'Classic',
-    description: '1 GK · 1 DEF · 2 CM · 1 ST — 5 players, quick games',
+    description: '1 GK, 1 DEF, 2 CM, 1 ST - 5 players, quick games',
     requirements: { GK: 1, DEF: 1, CM: 2, ST: 1 },
   },
   balanced: {
     label: 'Balanced',
-    description: '1 GK · 2 DEF · 2 CM · 1 ST — 6 players, solid backline',
+    description: '1 GK, 2 DEF, 2 CM, 1 ST - 6 players, solid backline',
     requirements: { GK: 1, DEF: 2, CM: 2, ST: 1 },
   },
   attack: {
     label: 'Total Attack',
-    description: '1 GK · 1 DEF · 2 CM · 2 ST — 6 players, goals galore',
+    description: '1 GK, 1 DEF, 2 CM, 2 ST - 6 players, goals galore',
     requirements: { GK: 1, DEF: 1, CM: 2, ST: 2 },
   },
   total: {
     label: 'Total Football',
-    description: '1 GK · 2 DEF · 3 CM · 2 ST — 8 players, the full experience',
+    description: '1 GK, 2 DEF, 3 CM, 2 ST - 8 players, the full experience',
     requirements: { GK: 1, DEF: 2, CM: 3, ST: 2 },
   },
 };
