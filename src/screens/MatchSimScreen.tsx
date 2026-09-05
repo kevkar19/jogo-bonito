@@ -143,6 +143,7 @@ function EventRow({ event }: { event: MatchEvent }) {
   return (
     <Text style={[styles.eventText, { color }]}>
       {event.minuteLabel} {EVENT_ICON[event.kind] ?? ''} {event.player}
+      {event.isPenalty ? ' (P)' : ''}
     </Text>
   );
 }

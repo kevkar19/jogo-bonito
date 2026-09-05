@@ -19,6 +19,8 @@ export interface MatchEvent {
   player: string | null;
   /** The narrative sentence shown in the commentary banner and the event log. */
   commentary: string;
+  /** True for a `goal` scored from the penalty spot during open play - shown as "(P)" like a real match report. */
+  isPenalty?: boolean;
 }
 
 export interface MatchResult {
@@ -130,7 +132,7 @@ function penaltySuccessChance(player: Player): number {
 interface RivalryTrait {
   opponentName: string;
   extraRedBias: number;
-  line: (opponentName: string, player: string) => string;
+  lines: ((opponentName: string, player: string) => string)[];
 }
 
 interface PlayerTraits {
@@ -154,8 +156,12 @@ const PLAYER_TRAITS: Record<string, PlayerTraits> = {
     rivalry: {
       opponentName: 'Lionel Messi',
       extraRedBias: 2.2,
-      line: (opponent, player) =>
-        `${player} scythes down ${opponent} with a reckless, studs-up tackle - the two have history! Red card, no hesitation from the referee.`,
+      lines: [
+        (opponent, player) =>
+          `${player} scythes down ${opponent} with a reckless, studs-up tackle - the two have history, and everyone in the stadium knew it was coming! Red card, no hesitation from the referee.`,
+        (opponent, player) =>
+          `Old rivalries die hard - ${player} goes straight through the back of ${opponent}! There was only ever going to be one outcome. Red card!`,
+      ],
     },
   },
   'Zinedine Zidane': {
@@ -163,14 +169,14 @@ const PLAYER_TRAITS: Record<string, PlayerTraits> = {
     redCardBias: 2.2,
     specialRedChance: 0.6,
     specialRedLines: [
-      (p) => `${p} snaps after a war of words and headbutts his marker square in the chest! Straight red - scenes reminiscent of 2006!`,
+      (p) => `${p} snaps after a war of words - and headbutts his marker square in the chest! Straight red. Scenes reminiscent of Berlin, 2006 - a genius, undone by a moment of madness.`,
     ],
   },
   'Diego Maradona': {
     scoringWeight: 1.3,
     specialGoalChance: 0.18,
     specialGoalLines: [
-      (p) => `${p} rises above the keeper and punches the ball into the net with his fist! The referee doesn't spot it - the Hand of God strikes again!`,
+      (p) => `${p} rises above the goalkeeper and punches the ball into the net with a clenched fist! The referee doesn't see it - the Hand of God strikes again!`,
     ],
   },
   'Luis Suarez': {
@@ -195,38 +201,64 @@ function traitsFor(name: string): PlayerTraits {
 }
 
 const GOAL_WITH_ASSIST = [
-  (scorer: string, assister: string) => `${scorer} finishes off a slick team move, assisted by ${assister}!`,
-  (scorer: string, assister: string) => `${scorer} taps in from close range after a pinpoint cross from ${assister}!`,
-  (scorer: string, assister: string) => `${scorer} heads it home from a corner delivered by ${assister}!`,
-  (scorer: string, assister: string) => `${scorer} smashes it home after a clever lay-off from ${assister}!`,
-  (scorer: string, assister: string) => `${scorer} makes no mistake, tapping in ${assister}'s low driven cross!`,
+  (scorer: string, assister: string) => `${assister} threads an impossible needle - and ${scorer} does the rest. Breathtaking!`,
+  (scorer: string, assister: string) => `${assister} paints the picture, ${scorer} provides the finishing brushstroke!`,
+  (scorer: string, assister: string) => `A gorgeous ball from ${assister}, and ${scorer} makes absolutely no mistake!`,
+  (scorer: string, assister: string) => `${assister} unlocks the door. ${scorer} walks straight through it!`,
+  (scorer: string, assister: string) => `The vision of ${assister}, the ruthlessness of ${scorer} - what a combination!`,
+  (scorer: string, assister: string) => `${scorer} rises highest to meet ${assister}'s inch-perfect corner. Thunderous header!`,
+  (scorer: string, assister: string) => `${assister} slides it through - ${scorer} strokes it home like it's nothing at all!`,
+  (scorer: string, assister: string) => `Give it to ${assister}, and watch the magic happen - ${scorer} taps home the simplest of finishes!`,
+  (scorer: string, assister: string) => `${scorer} times the run to perfection, ${assister}'s pass splitting the defense clean in two!`,
 ];
 const GOAL_SOLO = [
-  (scorer: string) => `${scorer} scores an outside-the-box screamer!`,
-  (scorer: string) => `${scorer} curls a brilliant free-kick into the top corner!`,
-  (scorer: string) => `${scorer} finishes off a mazy solo run!`,
-  (scorer: string) => `${scorer} slots home a cool, calm penalty!`,
-  (scorer: string) => `${scorer} pounces on a defensive error to slot home!`,
-  (scorer: string) => `${scorer} rifles a first-time volley into the roof of the net!`,
+  (scorer: string) => `${scorer} arrows one into the top corner - pure poetry from distance!`,
+  (scorer: string) => `Time seems to stop. ${scorer} finds the net. Bedlam!`,
+  (scorer: string) => `${scorer} conjures something from absolutely nothing. Pure genius!`,
+  (scorer: string) => `${scorer} bends it, dips it, and buries it in the far corner. Unstoppable!`,
+  (scorer: string) => `${scorer} writes another line into folklore with an outrageous strike!`,
+  (scorer: string) => `A moment for the grandchildren - ${scorer} lets fly and the net bulges!`,
+  (scorer: string) => `${scorer} glides past two challenges like they aren't there and finishes with ice-cold composure!`,
+  (scorer: string) => `${scorer} pounces on a loose ball in a flash - ruthless, clinical, unforgiving!`,
+  (scorer: string) => `${scorer} rifles a first-time volley into the roof of the net. Astonishing technique!`,
+  (scorer: string) => `${scorer} rises like a man possessed and thunders it home!`,
+  (scorer: string) => `${scorer} feints one way, goes the other, and slots it past a helpless keeper!`,
+];
+/** Roughly matches how often real open-play goals come from the penalty spot. */
+const PENALTY_GOAL_CHANCE = 0.09;
+const PENALTY_GOAL_TEMPLATES = [
+  (scorer: string) => `Ice in the veins. ${scorer} steps up and buries the penalty like it's a training-ground drill!`,
+  (scorer: string) => `No fear, no hesitation - ${scorer} sends the goalkeeper the wrong way from twelve yards!`,
+  (scorer: string) => `${scorer} strolls up with the composure of a man out for a stroll, and slots it away!`,
+  (scorer: string) => `The weight of the world on their shoulders - and ${scorer} carries it with ease. Penalty converted!`,
+  (scorer: string) => `${scorer} picks a corner and doesn't miss. Clinical from the spot!`,
+  (scorer: string) => `A stuttering run-up, a moment of pure nerve - and ${scorer} makes no mistake from the spot!`,
 ];
 const YELLOW_TEMPLATES = [
-  (p: string) => `${p} is booked for a late challenge.`,
-  (p: string) => `${p} picks up a yellow card for dissent.`,
-  (p: string) => `${p} goes into the book for a tactical foul.`,
+  (p: string) => `${p} goes into the referee's notebook after a crunching late challenge.`,
+  (p: string) => `A cynical foul, and ${p} pays the price - yellow card shown.`,
+  (p: string) => `${p} has a word too many with the official and is booked for his trouble.`,
+  (p: string) => `${p} scythes down his man to stop a promising break - no argument with that yellow.`,
+  (p: string) => `${p} picks up a needless caution for time-wasting.`,
 ];
 const RED_TEMPLATES = [
-  (p: string) => `${p} sees red after a reckless, studs-up challenge!`,
-  (p: string) => `${p} is sent off for a second bookable offense!`,
+  (p: string) => `It's reckless, it's needless, and ${p} knows it the moment he does it. Off you go!`,
+  (p: string) => `${p} leaves the referee with absolutely no choice whatsoever. Straight red!`,
+  (p: string) => `Madness! ${p} throws it all away with one moment of pure recklessness!`,
+  (p: string) => `${p} goes in studs-up and completely out of control. There's only one outcome here - red card!`,
+  (p: string) => `A horror-show challenge from ${p}. The referee doesn't even need to think about it!`,
 ];
 const PENALTY_SCORED_TEMPLATES = [
-  (p: string) => `${p} steps up... and slots it away coolly!`,
-  (p: string) => `${p} sends the keeper the wrong way. Scores!`,
-  (p: string) => `${p} smashes it straight down the middle. In!`,
+  (p: string) => `${p} steps up... and slots it away with icy composure!`,
+  (p: string) => `${p} sends the keeper the wrong way. Scores, and doesn't even celebrate - he knew!`,
+  (p: string) => `${p} smashes it straight down the middle. Nerveless!`,
+  (p: string) => `${p} picks his spot and buries it. Never in doubt!`,
 ];
 const PENALTY_MISSED_TEMPLATES = [
-  (p: string) => `${p} steps up... and blazes it over the bar!`,
-  (p: string) => `${p}'s effort is saved by the keeper!`,
-  (p: string) => `${p} strikes it wide. Heartbreak!`,
+  (p: string) => `${p} steps up... and blazes it over the bar! Agony!`,
+  (p: string) => `${p}'s effort is kept out by a brilliant save! The keeper is the hero!`,
+  (p: string) => `${p} strikes it wide. Heartbreak, pure and simple!`,
+  (p: string) => `${p} can't watch - and neither can we. Off the post and away to safety!`,
 ];
 
 interface DraftEvent extends MatchEvent {
@@ -298,8 +330,12 @@ function addGoalEvents(
     const scorerTraits = traitsFor(scorer.name);
 
     let commentary: string;
+    let isPenalty = false;
     if (scorerTraits.specialGoalLines && Math.random() < (scorerTraits.specialGoalChance ?? 0)) {
       commentary = randomFrom(scorerTraits.specialGoalLines)(scorer.name);
+    } else if (Math.random() < PENALTY_GOAL_CHANCE) {
+      isPenalty = true;
+      commentary = randomFrom(PENALTY_GOAL_TEMPLATES)(scorer.name);
     } else {
       const assistCandidates = squadPlayers(team.squad).filter((p) => p.name !== scorer.name && isAvailable(p));
       const assister = Math.random() < 0.65 && assistCandidates.length > 0 ? pickAssisterFrom(assistCandidates) : null;
@@ -315,6 +351,7 @@ function addGoalEvents(
       kind: 'goal',
       player: scorer.name,
       commentary,
+      isPenalty,
     });
   }
 }
@@ -357,7 +394,7 @@ function addCardEvents(
 
     let commentary: string;
     if (isRed && rivalryTriggered && Math.random() < 0.8) {
-      commentary = traits.rivalry!.line(traits.rivalry!.opponentName, player.name);
+      commentary = randomFrom(traits.rivalry!.lines)(traits.rivalry!.opponentName, player.name);
     } else if (isRed && traits.specialRedLines && Math.random() < (traits.specialRedChance ?? 0)) {
       commentary = randomFrom(traits.specialRedLines)(player.name);
     } else {
