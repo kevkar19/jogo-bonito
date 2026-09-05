@@ -1,6 +1,5 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { GameState } from '../gameEngine';
-import { matchWinner } from '../matchSim';
 import { squadTotalOverall } from '../types';
 import { colors, fonts } from '../theme';
 import SquadCard from '../components/SquadCard';
@@ -18,8 +17,11 @@ export default function FinalResultsScreen({
   const total2 = squadTotalOverall(state.teams[2].squad);
   const showBudget = state.config.biddingMode !== 'draft';
 
-  const usingMatchSim = state.config.endMode === 'matchSim' && state.matchResult !== null;
-  const winner = usingMatchSim ? matchWinner(state.matchResult!) : total1 === total2 ? null : total1 > total2 ? 1 : 2;
+  const matchResult = state.matchResult;
+  const usingMatchSim = state.config.endMode === 'matchSim' && matchResult !== null;
+  // The match-sim mode always resolves to a decisive winner (extra time,
+  // then penalties) - only the plain rating comparison can end in a draw.
+  const winner = usingMatchSim ? matchResult!.winner : total1 === total2 ? null : total1 > total2 ? 1 : 2;
   const isDraw = winner === null;
   const winnerName = winner ? state.teams[winner].name : null;
 
@@ -32,7 +34,11 @@ export default function FinalResultsScreen({
         <Text style={styles.headline}>{isDraw ? "It's a draw!" : `${winnerName} wins!`}</Text>
         {usingMatchSim ? (
           <Text style={styles.subheadline}>
-            Final score: {state.matchResult!.score[1]} - {state.matchResult!.score[2]}
+            {matchResult!.wentToPenalties
+              ? `${matchResult!.finalScore[1]} - ${matchResult!.finalScore[2]} (${matchResult!.penaltyScore![1]} - ${matchResult!.penaltyScore![2]} on penalties)`
+              : matchResult!.wentToExtraTime
+                ? `${matchResult!.finalScore[1]} - ${matchResult!.finalScore[2]} after extra time`
+                : `Final score: ${matchResult!.finalScore[1]} - ${matchResult!.finalScore[2]}`}
           </Text>
         ) : (
           !isDraw && (
