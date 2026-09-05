@@ -265,6 +265,13 @@ function simulateShootout(teamA: Team, teamB: Team): { events: MatchEvent[]; sco
 }
 
 /**
+ * How much a rating-strength gap skews expected goals. Larger = more upsets.
+ * Tuned so a clearly stronger squad wins roughly 65% of the time rather than
+ * being a near-lock - football is not that predictable.
+ */
+const RATING_GAP_DIVISOR = 65;
+
+/**
  * Simulates a full match between two drafted squads: each side's attack
  * rating (CM + ST average) against the opponent's defense rating (GK + DEF
  * average) sets an expected-goals value driving a Poisson-style random goal
@@ -274,8 +281,8 @@ function simulateShootout(teamA: Team, teamB: Team): { events: MatchEvent[]; sco
  * decisive winner rather than accepting a draw.
  */
 export function simulateMatch(teamA: Team, teamB: Team): MatchResult {
-  const xgA = clamp(1.4 + (attackStrength(teamA) - defenseStrength(teamB)) / 12, 0.25, 4.5);
-  const xgB = clamp(1.4 + (attackStrength(teamB) - defenseStrength(teamA)) / 12, 0.25, 4.5);
+  const xgA = clamp(1.4 + (attackStrength(teamA) - defenseStrength(teamB)) / RATING_GAP_DIVISOR, 0.25, 4.5);
+  const xgB = clamp(1.4 + (attackStrength(teamB) - defenseStrength(teamA)) / RATING_GAP_DIVISOR, 0.25, 4.5);
 
   const regGoalsA = randomGoals(xgA);
   const regGoalsB = randomGoals(xgB);
