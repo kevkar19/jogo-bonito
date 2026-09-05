@@ -41,6 +41,27 @@ function randInt(min: number, max: number): number {
   return min + Math.floor(Math.random() * (max - min + 1));
 }
 
+/**
+ * A random minute in range that hasn't been used yet this phase - two
+ * separate goals landing on the exact same minute reads as a rendering
+ * duplicate even though it isn't one, so each phase's incidents (goals and
+ * cards together) get distinct minutes.
+ */
+function uniqueMinute(used: Set<number>, min: number, max: number): number {
+  for (let attempt = 0; attempt < 50; attempt++) {
+    const minute = randInt(min, max);
+    if (!used.has(minute)) {
+      used.add(minute);
+      return minute;
+    }
+  }
+  // Range exhausted (shouldn't happen at this game's event volume) - fall
+  // back to a duplicate rather than looping forever.
+  const minute = randInt(min, max);
+  used.add(minute);
+  return minute;
+}
+
 function randomFrom<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
@@ -142,10 +163,11 @@ function addGoalEvents(
   team: Team,
   count: number,
   minMinute: number,
-  maxMinute: number
+  maxMinute: number,
+  usedMinutes: Set<number>
 ) {
   for (let i = 0; i < count; i++) {
-    const minute = randInt(minMinute, maxMinute);
+    const minute = uniqueMinute(usedMinutes, minMinute, maxMinute);
     const scorer = randomFrom(squadAttackers(team));
     const assister = Math.random() < 0.65 ? pickAssister(team, scorer.name) : null;
     const commentary = assister
@@ -168,6 +190,7 @@ function addCardEvents(
   teamB: Team,
   minMinute: number,
   maxMinute: number,
+  usedMinutes: Set<number>,
   fewer = false
 ) {
   const r = Math.random();
@@ -176,7 +199,7 @@ function addCardEvents(
     const teamId: TeamId = Math.random() < 0.5 ? 1 : 2;
     const team = teamId === 1 ? teamA : teamB;
     const player = randomFrom(squadPlayers(team.squad));
-    const minute = randInt(minMinute, maxMinute);
+    const minute = uniqueMinute(usedMinutes, minMinute, maxMinute);
     const isRed = Math.random() < 0.12;
     out.push({
       sortKey: minute,
@@ -288,10 +311,11 @@ export function simulateMatch(teamA: Team, teamB: Team): MatchResult {
   const regGoalsB = randomGoals(xgB);
   const regulationScore: Record<TeamId, number> = { 1: regGoalsA, 2: regGoalsB };
 
+  const regMinutes = new Set<number>();
   const regDraft: DraftEvent[] = [];
-  addGoalEvents(regDraft, 1, teamA, regGoalsA, 1, 90);
-  addGoalEvents(regDraft, 2, teamB, regGoalsB, 1, 90);
-  addCardEvents(regDraft, teamA, teamB, 1, 90);
+  addGoalEvents(regDraft, 1, teamA, regGoalsA, 1, 90, regMinutes);
+  addGoalEvents(regDraft, 2, teamB, regGoalsB, 1, 90, regMinutes);
+  addCardEvents(regDraft, teamA, teamB, 1, 90, regMinutes);
 
   const tiedAfterReg = regGoalsA === regGoalsB;
   const events: MatchEvent[] = [...finalize(regDraft), fullTimeMarker(regulationScore, tiedAfterReg, 'regulation')];
@@ -311,10 +335,11 @@ export function simulateMatch(teamA: Team, teamB: Team): MatchResult {
     const etGoalsA = randomGoals(etXgA);
     const etGoalsB = randomGoals(etXgB);
 
+    const etMinutes = new Set<number>();
     const etDraft: DraftEvent[] = [];
-    addGoalEvents(etDraft, 1, teamA, etGoalsA, 91, 120);
-    addGoalEvents(etDraft, 2, teamB, etGoalsB, 91, 120);
-    addCardEvents(etDraft, teamA, teamB, 91, 120, true);
+    addGoalEvents(etDraft, 1, teamA, etGoalsA, 91, 120, etMinutes);
+    addGoalEvents(etDraft, 2, teamB, etGoalsB, 91, 120, etMinutes);
+    addCardEvents(etDraft, teamA, teamB, 91, 120, etMinutes, true);
 
     finalScore = { 1: regGoalsA + etGoalsA, 2: regGoalsB + etGoalsB };
     const tiedAfterEt = finalScore[1] === finalScore[2];
