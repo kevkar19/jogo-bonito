@@ -11,6 +11,7 @@ import ReadyScreen from './src/screens/ReadyScreen';
 import BiddingScreen from './src/screens/BiddingScreen';
 import AuctionResultScreen from './src/screens/AuctionResultScreen';
 import SuspenseScreen from './src/screens/SuspenseScreen';
+import MatchSimScreen from './src/screens/MatchSimScreen';
 import FinalResultsScreen from './src/screens/FinalResultsScreen';
 import MuteButton from './src/components/MuteButton';
 import QuitButton from './src/components/QuitButton';
@@ -147,6 +148,8 @@ export default function App() {
           onRaise={withClick(() => dispatch({ type: 'RAISE' }))}
           onCustomBid={withClick((amount: number) => dispatch({ type: 'BID_CUSTOM', amount }))}
           onPass={withClick(() => dispatch({ type: 'PASS' }))}
+          onDraftTake={withClick(() => dispatch({ type: 'DRAFT_TAKE' }))}
+          onSubmitSealedBid={withClick((amount: number) => dispatch({ type: 'SUBMIT_SEALED_BID', amount }))}
         />
       )}
       {state.phase === 'auctionResult' && (
@@ -157,6 +160,9 @@ export default function App() {
       )}
       {state.phase === 'suspense' && (
         <SuspenseScreen onFinish={() => dispatch({ type: 'FINISH_SUSPENSE' })} />
+      )}
+      {state.phase === 'matchSim' && (
+        <MatchSimScreen state={state} onFinish={withClick(() => dispatch({ type: 'FINISH_MATCH_SIM' }))} />
       )}
       {state.phase === 'gameOver' && (
         <FinalResultsScreen state={state} onPlayAgain={withClick(() => dispatch({ type: 'RESET' }))} />

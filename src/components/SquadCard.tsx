@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/build/Ionicons';
 import { StyleSheet, Text, View } from 'react-native';
-import { Player, Team, squadTotalOverall } from '../types';
+import { Player, Position, Team, squadTotalOverall } from '../types';
 import { colors } from '../theme';
 import TeamAvatar from './TeamAvatar';
 import TierBadge from './TierBadge';
@@ -35,17 +35,22 @@ function Row({
   );
 }
 
+const POSITION_ORDER: Position[] = ['GK', 'DEF', 'CM', 'ST'];
+
 export default function SquadCard({
   team,
   accent,
   isWinner,
   hideRatings = false,
+  showBudget = true,
 }: {
   team: Team;
   accent: string;
   isWinner: boolean;
   /** Hides individual and total ratings, e.g. mid-game with "Hide overall ratings" on. */
   hideRatings?: boolean;
+  /** False in draft mode, where no coins are ever spent. */
+  showBudget?: boolean;
 }) {
   const total = squadTotalOverall(team.squad);
   return (
@@ -57,11 +62,11 @@ export default function SquadCard({
           {isWinner ? ' 🏆' : ''}
         </Text>
       </View>
-      <Row label="GK" player={team.squad.GK} hideRatings={hideRatings} />
-      <Row label="DEF" player={team.squad.DEF} hideRatings={hideRatings} />
-      <Row label="CM" player={team.squad.CM[0]} hideRatings={hideRatings} />
-      <Row label="CM" player={team.squad.CM[1]} hideRatings={hideRatings} />
-      <Row label="ST" player={team.squad.ST} hideRatings={hideRatings} />
+      {POSITION_ORDER.flatMap((position) =>
+        team.squad[position].map((player, i) => (
+          <Row key={`${position}-${i}`} label={position} player={player} hideRatings={hideRatings} />
+        ))
+      )}
       <View style={styles.divider} />
       <View style={styles.statRow}>
         <Text style={styles.statLabel}>Total OVR</Text>
@@ -69,10 +74,12 @@ export default function SquadCard({
           {hideRatings ? 'Hidden' : total}
         </Text>
       </View>
-      <View style={styles.statRow}>
-        <Text style={styles.statLabel}>Budget left</Text>
-        <Text style={styles.statValue}>{team.budget}</Text>
-      </View>
+      {showBudget && (
+        <View style={styles.statRow}>
+          <Text style={styles.statLabel}>Budget left</Text>
+          <Text style={styles.statValue}>{team.budget}</Text>
+        </View>
+      )}
     </View>
   );
 }

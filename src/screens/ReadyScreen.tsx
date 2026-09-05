@@ -11,7 +11,8 @@ export default function ReadyScreen({
   state: GameState;
   onReveal: () => void;
 }) {
-  const playersAuctioned = 10 - state.pool.length;
+  const playersAuctioned = state.totalPlayers - state.pool.length;
+  const showBudget = state.config.biddingMode !== 'draft';
 
   return (
     <View style={styles.flex}>
@@ -20,7 +21,7 @@ export default function ReadyScreen({
         <Text style={styles.eyebrow}>Pass the device to both players</Text>
         <Text style={styles.title}>Ready for the next player?</Text>
         <Text style={styles.progressText}>
-          {playersAuctioned} of 10 players auctioned
+          {playersAuctioned} of {state.totalPlayers} players auctioned
         </Text>
 
         <View style={styles.squadsRow}>
@@ -29,6 +30,7 @@ export default function ReadyScreen({
             accent={colors.team1}
             isWinner={false}
             hideRatings={state.config.hideRatings}
+            showBudget={showBudget}
           />
           <View style={styles.divider} />
           <SquadCard
@@ -36,6 +38,7 @@ export default function ReadyScreen({
             accent={colors.team2}
             isWinner={false}
             hideRatings={state.config.hideRatings}
+            showBudget={showBudget}
           />
         </View>
 

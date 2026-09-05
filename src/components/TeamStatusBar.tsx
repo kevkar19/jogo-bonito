@@ -1,21 +1,23 @@
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
-import { Team, TeamId } from '../types';
+import { BiddingMode, Team, TeamId, squadPlayers } from '../types';
 import { colors, fonts } from '../theme';
 import TeamAvatar from './TeamAvatar';
 
 /**
  * Always-visible scoreboard for both squads - shows each side's coin budget
- * at all times (not just on their turn) with the active side called out via
- * a glowing border and a slow breathing pulse, so who's up is unmistakable
- * even at a glance from across the table.
+ * (or, in draft mode, picks made) at all times, with the active side called
+ * out via a glowing border and a slow breathing pulse, so who's up is
+ * unmistakable even at a glance from across the table.
  */
 export default function TeamStatusBar({
   teams,
   turn,
+  biddingMode,
 }: {
   teams: Record<TeamId, Team>;
   turn: TeamId;
+  biddingMode: BiddingMode;
 }) {
   const pulse = useRef(new Animated.Value(0)).current;
 
@@ -50,12 +52,14 @@ export default function TeamStatusBar({
         accent={colors.team1}
         isActive={turn === 1}
         scale={scale}
+        biddingMode={biddingMode}
       />
       <TeamCard
         team={teams[2]}
         accent={colors.team2}
         isActive={turn === 2}
         scale={scale}
+        biddingMode={biddingMode}
       />
     </View>
   );
@@ -66,12 +70,18 @@ function TeamCard({
   accent,
   isActive,
   scale,
+  biddingMode,
 }: {
   team: Team;
   accent: string;
   isActive: boolean;
   scale: Animated.AnimatedInterpolation<number>;
+  biddingMode: BiddingMode;
 }) {
+  const isDraft = biddingMode === 'draft';
+  const statValue = isDraft ? squadPlayers(team.squad).length : team.budget;
+  const statLabel = isDraft ? 'players picked' : 'coins available';
+
   return (
     <Animated.View
       style={[
@@ -104,9 +114,9 @@ function TeamCard({
         </Text>
       </View>
       <Text style={[styles.budget, { color: isActive ? accent : colors.text }]}>
-        {team.budget}
+        {statValue}
       </Text>
-      <Text style={styles.coinsLabel}>coins available</Text>
+      <Text style={styles.coinsLabel}>{statLabel}</Text>
     </Animated.View>
   );
 }

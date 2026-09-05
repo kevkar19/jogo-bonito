@@ -31,9 +31,10 @@ export default function AuctionResultScreen({
   onContinue: () => void;
 }) {
   const result = state.lastResult;
-  // Only an uncontested win is a genuinely new reveal (it never went through
-  // BiddingScreen's flip) - track that case's flip completion here.
-  const isFreshReveal = result?.type === 'won' && !result.contested;
+  // A fresh reveal is a player who never went through BiddingScreen's flip
+  // (the revealNext single-eligible-team shortcut) - track that case's flip
+  // completion here.
+  const isFreshReveal = result?.type === 'won' && result.freshReveal;
   const [revealed, setRevealed] = useState(!isFreshReveal);
 
   useEffect(() => {
@@ -81,6 +82,8 @@ export default function AuctionResultScreen({
 
   const winnerTeam = state.teams[result.winner];
   const accent = result.winner === 1 ? colors.team1 : colors.team2;
+  const biddingMode = state.config.biddingMode;
+  const loserId = result.winner === 1 ? 2 : 1;
 
   const compactCard = (
     <View style={styles.playerCard}>
@@ -116,11 +119,29 @@ export default function AuctionResultScreen({
 
       {revealed && (
         <>
-          <Text style={styles.amount}>for {result.amount} coins</Text>
-          {!result.contested && (
+          {biddingMode === 'draft' ? (
+            <Text style={styles.amount}>drafted for free</Text>
+          ) : (
+            <Text style={styles.amount}>for {result.amount} coins</Text>
+          )}
+
+          {result.sealedBids && (
+            <Text style={styles.note}>
+              Secret bids: {state.teams[1].name} bid {result.sealedBids[1]} · {state.teams[2].name} bid{' '}
+              {result.sealedBids[2]}
+            </Text>
+          )}
+
+          {!result.sealedBids && !result.contested && biddingMode !== 'draft' && (
             <Text style={styles.note}>
               No competing bid - the other squad's {POSITION_LABELS[result.player.position]} slot
               was already filled.
+            </Text>
+          )}
+
+          {!result.sealedBids && !result.contested && biddingMode === 'draft' && (
+            <Text style={styles.note}>
+              {state.teams[loserId].name} let this one go.
             </Text>
           )}
         </>

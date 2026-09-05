@@ -1,4 +1,4 @@
-import { Player, Position, SQUAD_REQUIREMENTS } from './types';
+import { FormationRequirements, Player, PlayerPoolMode, Position } from './types';
 
 const FIRST_NAMES = [
   'Marco', 'Diego', 'Kwame', 'Lucas', 'Noah', 'Yusuf', 'Mateo', 'Kenji',
@@ -175,8 +175,8 @@ function nextId(): string {
   return `p${idCounter}`;
 }
 
-function tryPullIcon(position: Position): Player | null {
-  if (Math.random() > ICON_CHANCE) return null;
+function tryPullIcon(position: Position, forceAttempt: boolean): Player | null {
+  if (!forceAttempt && Math.random() > ICON_CHANCE) return null;
   const candidates = ICONS[position].filter((c) => !usedIconNames.has(c.name));
   if (candidates.length === 0) return null;
   const icon = candidates[Math.floor(Math.random() * candidates.length)];
@@ -200,28 +200,35 @@ function makeRandomPlayer(position: Position): Player {
   };
 }
 
-function makePlayer(position: Position): Player {
-  return tryPullIcon(position) ?? makeRandomPlayer(position);
+function makePlayer(position: Position, playerPool: PlayerPoolMode): Player {
+  const iconsOnly = playerPool === 'iconsOnly';
+  // Icons-only mode always tries for a photographed Icon first; if that
+  // position's roster is ever exhausted this falls back to a fictional
+  // player rather than crashing or duplicating a name.
+  return tryPullIcon(position, iconsOnly) ?? makeRandomPlayer(position);
 }
 
 /**
  * Builds the fixed auction pool for one game: exactly enough players of each
- * position for both squads to fill completely (2 GK, 2 DEF, 4 CM, 2 ST),
+ * position for both squads to fill completely per the chosen formation,
  * shuffled into a random auction order. Resets generator state for a new game.
  */
-export function generatePlayerPool(): Player[] {
+export function generatePlayerPool(
+  requirements: FormationRequirements,
+  playerPool: PlayerPoolMode
+): Player[] {
   resetGenerator();
   const pool: Player[] = [];
-  (Object.keys(SQUAD_REQUIREMENTS) as Position[]).forEach((position) => {
-    const countNeeded = SQUAD_REQUIREMENTS[position] * 2; // both squads
+  (Object.keys(requirements) as Position[]).forEach((position) => {
+    const countNeeded = requirements[position] * 2; // both squads
     for (let i = 0; i < countNeeded; i++) {
-      pool.push(makePlayer(position));
+      pool.push(makePlayer(position, playerPool));
     }
   });
   return shuffle(pool);
 }
 
 /** Generates one fresh replacement player of the given position (e.g. after a double-pass skip). */
-export function generateReplacementPlayer(position: Position): Player {
-  return makePlayer(position);
+export function generateReplacementPlayer(position: Position, playerPool: PlayerPoolMode): Player {
+  return makePlayer(position, playerPool);
 }

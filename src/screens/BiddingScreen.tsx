@@ -19,6 +19,7 @@ import CardBack from '../components/CardBack';
 import PlayerRevealCard from '../components/PlayerRevealCard';
 import PitchBackground from '../components/PitchBackground';
 import TeamStatusBar from '../components/TeamStatusBar';
+import BidTimer from '../components/BidTimer';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 // Sized to leave just enough room below for the status bar, bid info, and
@@ -31,21 +32,30 @@ export default function BiddingScreen({
   onRaise,
   onCustomBid,
   onPass,
+  onDraftTake,
+  onSubmitSealedBid,
 }: {
   state: GameState;
   onRaise: () => void;
   onCustomBid: (amount: number) => void;
   onPass: () => void;
+  onDraftTake: () => void;
+  onSubmitSealedBid: (amount: number) => void;
 }) {
-  const { currentPlayer, currentBid, currentBidder, turn, teams, config, openingPassed } = state;
+  const { currentPlayer, currentBid, currentBidder, turn, teams, config, openingPassed, sealedBids } =
+    state;
   const [customBidText, setCustomBidText] = useState('');
+  const [sealedBidText, setSealedBidText] = useState('');
   const [revealed, setRevealed] = useState(false);
   const [raiseConfirmPending, setRaiseConfirmPending] = useState(false);
+  const [handoffPending, setHandoffPending] = useState(false);
   const confirmTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pulse = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     setRevealed(false);
+    setHandoffPending(false);
+    setSealedBidText('');
   }, [currentPlayer?.id]);
 
   const clearPendingConfirm = () => {
@@ -99,12 +109,28 @@ export default function BiddingScreen({
   if (!currentPlayer || turn === null) return null;
 
   const turnTeam = teams[turn];
+  const otherTeamId = turn === 1 ? 2 : 1;
   const bidderTeam = currentBidder !== null ? teams[currentBidder] : null;
   const bidderAccent = currentBidder === 1 ? colors.team1 : colors.team2;
+  const timerResetKey = `${currentPlayer.id}-${turn}`;
+
+  const handleRaisePress = () => {
+    if (!raiseConfirmPending) {
+      armConfirm();
+      return;
+    }
+    clearPendingConfirm();
+    onRaise();
+  };
+
+  const handleCustomBidPress = () => {
+    if (!customBidValid) return;
+    onCustomBid(parsedCustomBid);
+    setCustomBidText('');
+  };
 
   const nextBid = currentBid + config.bidIncrement;
   const canRaise = nextBid <= turnTeam.budget;
-
   const minCustomBid = currentBidder === null ? config.bidIncrement : currentBid + 1;
   const parsedCustomBid = parseInt(customBidText, 10);
   const customBidValid =
@@ -124,21 +150,6 @@ export default function BiddingScreen({
     }
   }
 
-  const handleRaisePress = () => {
-    if (!raiseConfirmPending) {
-      armConfirm();
-      return;
-    }
-    clearPendingConfirm();
-    onRaise();
-  };
-
-  const handleCustomBidPress = () => {
-    if (!customBidValid) return;
-    onCustomBid(parsedCustomBid);
-    setCustomBidText('');
-  };
-
   let passLabel: string;
   if (bidderTeam) {
     passLabel = `Pass - ${bidderTeam.name} wins for ${currentBid}`;
@@ -148,6 +159,36 @@ export default function BiddingScreen({
     passLabel = 'Pass on this player';
   }
 
+  // Sealed-bid entry.
+  const parsedSealedBid = parseInt(sealedBidText, 10);
+  const sealedBidValid =
+    sealedBidText.trim() !== '' &&
+    Number.isFinite(parsedSealedBid) &&
+    parsedSealedBid >= config.bidIncrement &&
+    parsedSealedBid <= turnTeam.budget;
+  let sealedBidError: string | null = null;
+  if (sealedBidText.trim() !== '' && !sealedBidValid) {
+    if (!Number.isFinite(parsedSealedBid)) {
+      sealedBidError = 'Enter a whole number.';
+    } else if (parsedSealedBid < config.bidIncrement) {
+      sealedBidError = `Must be at least ${config.bidIncrement} (or 0 to pass).`;
+    } else if (parsedSealedBid > turnTeam.budget) {
+      sealedBidError = `Only ${turnTeam.budget} coins available.`;
+    }
+  }
+
+  const isFirstSealedSubmission = sealedBids ? sealedBids[otherTeamId] === null : true;
+
+  const handleLockInSealedBid = (amount: number) => {
+    onSubmitSealedBid(amount);
+    setSealedBidText('');
+    if (isFirstSealedSubmission) setHandoffPending(true);
+  };
+
+  const handleSealedTimerExpire = () => {
+    handleLockInSealedBid(0);
+  };
+
   return (
     <KeyboardAvoidingView
       style={styles.flex}
@@ -155,7 +196,7 @@ export default function BiddingScreen({
     >
       <PitchBackground />
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        <TeamStatusBar teams={teams} turn={turn} />
+        <TeamStatusBar teams={teams} turn={turn} biddingMode={config.biddingMode} />
 
         <FlipCard
           flipKey={currentPlayer.id}
@@ -167,8 +208,77 @@ export default function BiddingScreen({
 
         {!revealed ? (
           <Text style={styles.revealingText}>Revealing player…</Text>
+        ) : config.biddingMode === 'draft' ? (
+          <>
+            {config.timerSeconds && (
+              <BidTimer seconds={config.timerSeconds} resetKey={timerResetKey} onExpire={onPass} />
+            )}
+            <Text style={styles.draftPrompt}>
+              <Text style={{ fontWeight: '800' }}>{turnTeam.name}</Text>, take this player or skip them?
+            </Text>
+            <Pressable style={[styles.actionButton, styles.raiseButton]} onPress={onDraftTake}>
+              <Text style={styles.actionButtonText}>Draft {currentPlayer.name}</Text>
+            </Pressable>
+            <Pressable style={[styles.actionButton, styles.passButton]} onPress={onPass}>
+              <Text style={styles.passButtonText}>Skip - send them to the other pick</Text>
+            </Pressable>
+          </>
+        ) : config.biddingMode === 'sealed' ? (
+          handoffPending ? (
+            <View style={styles.handoffWrap}>
+              <Text style={styles.handoffTitle}>Bid locked in!</Text>
+              <Text style={styles.handoffText}>
+                Hand the device to <Text style={{ fontWeight: '800' }}>{teams[otherTeamId].name}</Text>{' '}
+                without showing them the screen.
+              </Text>
+              <Pressable style={[styles.actionButton, styles.raiseButton]} onPress={() => setHandoffPending(false)}>
+                <Text style={styles.actionButtonText}>{teams[otherTeamId].name}, tap to continue</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <>
+              {config.timerSeconds && (
+                <BidTimer
+                  seconds={config.timerSeconds}
+                  resetKey={timerResetKey}
+                  onExpire={handleSealedTimerExpire}
+                />
+              )}
+              <Text style={styles.draftPrompt}>
+                <Text style={{ fontWeight: '800' }}>{turnTeam.name}</Text>, enter your secret bid
+              </Text>
+              <Text style={styles.sealedHint}>
+                Don't let the other team see this screen. Enter 0 to pass.
+              </Text>
+              <View style={styles.customBidRow}>
+                <TextInput
+                  style={[styles.customBidInput, sealedBidError && styles.customBidInputError]}
+                  value={sealedBidText}
+                  onChangeText={setSealedBidText}
+                  placeholder={`Secret bid (min ${config.bidIncrement}, or 0)`}
+                  placeholderTextColor={colors.textMuted}
+                  keyboardType="number-pad"
+                  secureTextEntry
+                />
+              </View>
+              {sealedBidError && <Text style={styles.customBidErrorText}>{sealedBidError}</Text>}
+              <Pressable
+                style={[styles.actionButton, styles.raiseButton, !sealedBidValid && styles.disabledButton]}
+                onPress={() => sealedBidValid && handleLockInSealedBid(parsedSealedBid)}
+                disabled={!sealedBidValid}
+              >
+                <Text style={styles.actionButtonText}>Lock In Bid</Text>
+              </Pressable>
+              <Pressable style={[styles.actionButton, styles.passButton]} onPress={() => handleLockInSealedBid(0)}>
+                <Text style={styles.passButtonText}>Pass (bid 0)</Text>
+              </Pressable>
+            </>
+          )
         ) : (
           <>
+            {config.timerSeconds && (
+              <BidTimer seconds={config.timerSeconds} resetKey={timerResetKey} onExpire={onPass} />
+            )}
             <View style={styles.bidInfo}>
               <Text style={styles.bidLabel}>Current bid</Text>
               <Text style={styles.bidValue}>{currentBid} coins</Text>
@@ -244,6 +354,35 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 14,
     fontStyle: 'italic',
+  },
+  draftPrompt: {
+    color: colors.text,
+    textAlign: 'center',
+    fontSize: 15,
+    marginTop: 10,
+    marginBottom: 12,
+  },
+  sealedHint: {
+    color: colors.textMuted,
+    textAlign: 'center',
+    fontSize: 12,
+    marginBottom: 12,
+    fontStyle: 'italic',
+  },
+  handoffWrap: { alignItems: 'center', marginTop: 16 },
+  handoffTitle: {
+    color: colors.accent,
+    fontSize: 22,
+    fontFamily: fonts.display,
+    marginBottom: 8,
+  },
+  handoffText: {
+    color: colors.text,
+    textAlign: 'center',
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 18,
+    paddingHorizontal: 12,
   },
   bidInfo: { alignItems: 'center', marginTop: 6, marginBottom: 6 },
   bidLabel: { color: '#c9dcd2', fontSize: 12 },

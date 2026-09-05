@@ -19,12 +19,11 @@ export function getRatingTier(overall: number): RatingTier {
   return 'Common';
 }
 
-export interface SquadSlots {
-  GK: Player | null;
-  DEF: Player | null;
-  CM: [Player | null, Player | null];
-  ST: Player | null;
-}
+/** How many of each position a squad needs - varies by formation. */
+export type FormationRequirements = Record<Position, number>;
+
+/** A squad's slots for one position, in fill order. Length is fixed per game (by formation). */
+export type SquadSlots = Record<Position, (Player | null)[]>;
 
 /** A human player's chosen icon avatar (id references an entry in AVATAR_OPTIONS). */
 export type AvatarId = string;
@@ -36,6 +35,11 @@ export interface Team {
   avatar: AvatarId;
 }
 
+export type BiddingMode = 'auction' | 'draft' | 'sealed';
+export type PlayerPoolMode = 'all' | 'iconsOnly';
+export type EndMode = 'ovr' | 'matchSim';
+export type FormationId = 'classic' | 'balanced' | 'attack' | 'total';
+
 export interface GameConfig {
   startingBudget: number;
   bidIncrement: number;
@@ -45,6 +49,12 @@ export interface GameConfig {
   team2Avatar: AvatarId;
   /** When true, hide every numeric overall rating until the Final Results screen. */
   hideRatings: boolean;
+  biddingMode: BiddingMode;
+  playerPool: PlayerPoolMode;
+  endMode: EndMode;
+  formation: FormationId;
+  /** Seconds allowed per bidding decision, or null for no timer. */
+  timerSeconds: number | null;
 }
 
 export type TeamId = 1 | 2;
@@ -56,54 +66,76 @@ export const POSITION_LABELS: Record<Position, string> = {
   ST: 'Striker',
 };
 
-/** How many of each position are needed per squad. */
-export const SQUAD_REQUIREMENTS: Record<Position, number> = {
-  GK: 1,
-  DEF: 1,
-  CM: 2,
-  ST: 1,
-};
-
-export function emptySquad(): SquadSlots {
-  return { GK: null, DEF: null, CM: [null, null], ST: null };
+export interface FormationOption {
+  label: string;
+  description: string;
+  requirements: FormationRequirements;
 }
 
-/** Open slots remaining for a position in a squad (0, 1, or 2 for CM). */
+/**
+ * Squad-size presets. Real formation numbers (4-3-3 etc.) don't map cleanly
+ * onto this game's four broad position buckets, so these are flavored as
+ * squad-building styles instead, scaled to stay well within the curated
+ * Icon roster's size per position.
+ */
+export const FORMATIONS: Record<FormationId, FormationOption> = {
+  classic: {
+    label: 'Classic',
+    description: '1 GK · 1 DEF · 2 CM · 1 ST — 5 players, quick games',
+    requirements: { GK: 1, DEF: 1, CM: 2, ST: 1 },
+  },
+  balanced: {
+    label: 'Balanced',
+    description: '1 GK · 2 DEF · 2 CM · 1 ST — 6 players, solid backline',
+    requirements: { GK: 1, DEF: 2, CM: 2, ST: 1 },
+  },
+  attack: {
+    label: 'Total Attack',
+    description: '1 GK · 1 DEF · 2 CM · 2 ST — 6 players, goals galore',
+    requirements: { GK: 1, DEF: 1, CM: 2, ST: 2 },
+  },
+  total: {
+    label: 'Total Football',
+    description: '1 GK · 2 DEF · 3 CM · 2 ST — 8 players, the full experience',
+    requirements: { GK: 1, DEF: 2, CM: 3, ST: 2 },
+  },
+};
+
+export function emptySquad(requirements: FormationRequirements): SquadSlots {
+  const squad = {} as SquadSlots;
+  (Object.keys(requirements) as Position[]).forEach((position) => {
+    squad[position] = new Array(requirements[position]).fill(null);
+  });
+  return squad;
+}
+
+/** Open slots remaining for a position in a squad. */
 export function openSlotsForPosition(squad: SquadSlots, position: Position): number {
-  if (position === 'CM') {
-    return squad.CM.filter((p) => p === null).length;
-  }
-  return squad[position] === null ? 1 : 0;
+  return squad[position].filter((p) => p === null).length;
 }
 
 export function isSquadFull(squad: SquadSlots): boolean {
-  return (
-    squad.GK !== null &&
-    squad.DEF !== null &&
-    squad.ST !== null &&
-    squad.CM[0] !== null &&
-    squad.CM[1] !== null
+  return (Object.keys(squad) as Position[]).every((position) =>
+    squad[position].every((p) => p !== null)
   );
 }
 
 export function squadTotalOverall(squad: SquadSlots): number {
-  const players = [squad.GK, squad.DEF, squad.CM[0], squad.CM[1], squad.ST];
-  return players.reduce((sum, p) => sum + (p?.overall ?? 0), 0);
+  return squadPlayers(squad).reduce((sum, p) => sum + p.overall, 0);
 }
 
 export function squadPlayers(squad: SquadSlots): Player[] {
-  return [squad.GK, squad.DEF, squad.CM[0], squad.CM[1], squad.ST].filter(
-    (p): p is Player => p !== null
+  return (Object.keys(squad) as Position[]).flatMap((position) =>
+    squad[position].filter((p): p is Player => p !== null)
   );
 }
 
 /** Assigns a won player into the first open slot for their position. Returns a new squad. */
 export function assignToSquad(squad: SquadSlots, player: Player): SquadSlots {
-  if (player.position === 'CM') {
-    const cmIndex = squad.CM[0] === null ? 0 : 1;
-    const newCM: [Player | null, Player | null] = [...squad.CM];
-    newCM[cmIndex] = player;
-    return { ...squad, CM: newCM };
-  }
-  return { ...squad, [player.position]: player };
+  const slots = squad[player.position];
+  const openIndex = slots.findIndex((p) => p === null);
+  if (openIndex === -1) return squad; // shouldn't happen - caller checks eligibility first
+  const newSlots = [...slots];
+  newSlots[openIndex] = player;
+  return { ...squad, [player.position]: newSlots };
 }

@@ -1,5 +1,6 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { GameState } from '../gameEngine';
+import { matchWinner } from '../matchSim';
 import { squadTotalOverall } from '../types';
 import { colors, fonts } from '../theme';
 import SquadCard from '../components/SquadCard';
@@ -15,8 +16,11 @@ export default function FinalResultsScreen({
 }) {
   const total1 = squadTotalOverall(state.teams[1].squad);
   const total2 = squadTotalOverall(state.teams[2].squad);
-  const isDraw = total1 === total2;
-  const winner = isDraw ? null : total1 > total2 ? 1 : 2;
+  const showBudget = state.config.biddingMode !== 'draft';
+
+  const usingMatchSim = state.config.endMode === 'matchSim' && state.matchResult !== null;
+  const winner = usingMatchSim ? matchWinner(state.matchResult!) : total1 === total2 ? null : total1 > total2 ? 1 : 2;
+  const isDraw = winner === null;
   const winnerName = winner ? state.teams[winner].name : null;
 
   return (
@@ -26,10 +30,16 @@ export default function FinalResultsScreen({
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.eyebrow}>Final Results</Text>
         <Text style={styles.headline}>{isDraw ? "It's a draw!" : `${winnerName} wins!`}</Text>
-        {!isDraw && (
+        {usingMatchSim ? (
           <Text style={styles.subheadline}>
-            {total1 > total2 ? total1 : total2} OVR vs {total1 > total2 ? total2 : total1} OVR
+            Final score: {state.matchResult!.score[1]} - {state.matchResult!.score[2]}
           </Text>
+        ) : (
+          !isDraw && (
+            <Text style={styles.subheadline}>
+              {total1 > total2 ? total1 : total2} OVR vs {total1 > total2 ? total2 : total1} OVR
+            </Text>
+          )
         )}
 
         <View style={styles.squadsRow}>
@@ -39,6 +49,7 @@ export default function FinalResultsScreen({
             accent={colors.team1}
             isWinner={winner === 1}
             hideRatings={false}
+            showBudget={showBudget}
           />
           <View style={{ width: 12 }} />
           <SquadCard
@@ -46,6 +57,7 @@ export default function FinalResultsScreen({
             accent={colors.team2}
             isWinner={winner === 2}
             hideRatings={false}
+            showBudget={showBudget}
           />
         </View>
 
