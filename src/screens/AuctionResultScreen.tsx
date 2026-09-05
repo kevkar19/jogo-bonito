@@ -139,9 +139,9 @@ export default function AuctionResultScreen({
             </Text>
           )}
 
-          {!result.sealedBids && !result.contested && biddingMode === 'draft' && (
+          {result.draftPassed && (
             <Text style={styles.note}>
-              {state.teams[loserId].name} let this one go.
+              {state.teams[loserId].name} passed, so {winnerTeam.name} drafted them instead.
             </Text>
           )}
         </>

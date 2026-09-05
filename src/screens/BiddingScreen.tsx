@@ -214,13 +214,14 @@ export default function BiddingScreen({
               <BidTimer seconds={config.timerSeconds} resetKey={timerResetKey} onExpire={onPass} />
             )}
             <Text style={styles.draftPrompt}>
-              <Text style={{ fontWeight: '800' }}>{turnTeam.name}</Text>, take this player or skip them?
+              <Text style={{ fontWeight: '800' }}>{turnTeam.name}</Text>, draft this player or pass them to{' '}
+              <Text style={{ fontWeight: '800' }}>{teams[otherTeamId].name}</Text>?
             </Text>
             <Pressable style={[styles.actionButton, styles.raiseButton]} onPress={onDraftTake}>
               <Text style={styles.actionButtonText}>Draft {currentPlayer.name}</Text>
             </Pressable>
             <Pressable style={[styles.actionButton, styles.passButton]} onPress={onPass}>
-              <Text style={styles.passButtonText}>Skip - send them to the other pick</Text>
+              <Text style={styles.passButtonText}>Pass to {teams[otherTeamId].name}</Text>
             </Pressable>
           </>
         ) : config.biddingMode === 'sealed' ? (

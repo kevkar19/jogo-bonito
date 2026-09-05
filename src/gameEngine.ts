@@ -30,6 +30,8 @@ export type AuctionResultInfo =
       freshReveal: boolean;
       /** Present only for sealed-bid wins, so the result screen can reveal both secret bids. */
       sealedBids?: Record<TeamId, number>;
+      /** Present only in draft mode when the winner got this player because the other side passed. */
+      draftPassed?: boolean;
     }
   | { type: 'skipped'; player: Player; replacement: Player };
 
@@ -329,9 +331,19 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       if (state.config.biddingMode === 'sealed') return state; // sealed mode uses SUBMIT_SEALED_BID
 
       if (state.config.biddingMode === 'draft') {
-        // Single-decision draft: passing sends the player away and hands the
-        // next pick to the other team - same mechanics as a mutual skip.
-        return resolveSkip(state);
+        // Draft mode has no true "skip" - if this side doesn't want the
+        // player, the other side gets them for free instead. revealNext only
+        // enters bidding with two eligible teams, so the other side is
+        // guaranteed to have an open slot for them.
+        const otherId = otherTeam(state.turn);
+        const resolved = resolveWin(state, otherId, 0, false, false);
+        return {
+          ...resolved,
+          lastResult:
+            resolved.lastResult && resolved.lastResult.type === 'won'
+              ? { ...resolved.lastResult, draftPassed: true }
+              : resolved.lastResult,
+        };
       }
 
       // Auction mode - already flipped face-up in BiddingScreen.
