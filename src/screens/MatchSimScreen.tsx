@@ -6,9 +6,16 @@ import { colors, fonts } from '../theme';
 import PitchBackground from '../components/PitchBackground';
 import TeamAvatar from '../components/TeamAvatar';
 
-const EVENT_DELAY_MS = 1000;
-const MARKER_DELAY_MS = 1900;
-const FULL_TIME_DELAY_MS = 1200;
+const FULL_TIME_DELAY_MS = 1500;
+
+/** Gives longer commentary sentences more time on screen instead of a flat delay. */
+function readingDelay(commentary: string, isMarker: boolean): number {
+  const base = isMarker ? 1600 : 1200;
+  const perChar = 40;
+  const min = isMarker ? 3000 : 2200;
+  const max = isMarker ? 5500 : 4500;
+  return Math.min(max, Math.max(min, base + commentary.length * perChar));
+}
 
 const EVENT_ICON: Partial<Record<MatchEventKind, string>> = {
   goal: '⚽',
@@ -44,8 +51,8 @@ export default function MatchSimScreen({
       const timer = setTimeout(() => setFullTime(true), FULL_TIME_DELAY_MS);
       return () => clearTimeout(timer);
     }
-    const nextKind = result.events[visibleCount].kind;
-    const delay = MARKER_KINDS.has(nextKind) ? MARKER_DELAY_MS : EVENT_DELAY_MS;
+    const next = result.events[visibleCount];
+    const delay = readingDelay(next.commentary, MARKER_KINDS.has(next.kind));
     const timer = setTimeout(() => setVisibleCount((c) => c + 1), delay);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
