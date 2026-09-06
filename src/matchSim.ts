@@ -507,11 +507,20 @@ function simulateShootout(
 }
 
 /**
- * How much a rating-strength gap skews expected goals. Larger = more upsets.
- * Tuned so a clearly stronger squad wins roughly 65% of the time rather than
- * being a near-lock - football is not that predictable.
+ * How much a rating-strength gap skews expected goals. A flat linear divisor
+ * can't satisfy both "a clearly stronger squad wins about 65% of the time"
+ * and "when they do win, a huge gap should produce a convincing scoreline" -
+ * those need different sensitivities. Instead the gap is raised to a power
+ * greater than 1 before scaling, so small/moderate gaps barely move the
+ * needle (preserving realistic upset odds) while large gaps compound much
+ * more sharply into a lopsided expected-goals split.
  */
-const RATING_GAP_DIVISOR = 65;
+const RATING_GAP_EXPONENT = 1.6;
+const RATING_GAP_SCALE = 400;
+
+function ratingGapAdjustment(diff: number): number {
+  return Math.sign(diff) * Math.pow(Math.abs(diff), RATING_GAP_EXPONENT) / RATING_GAP_SCALE;
+}
 
 /**
  * Simulates a full match between two drafted squads: each side's attack
@@ -526,8 +535,8 @@ const RATING_GAP_DIVISOR = 65;
  * than accepting a draw.
  */
 export function simulateMatch(teamA: Team, teamB: Team): MatchResult {
-  const baseXgA = clamp(1.4 + (attackStrength(teamA) - defenseStrength(teamB)) / RATING_GAP_DIVISOR, 0.25, 4.5);
-  const baseXgB = clamp(1.4 + (attackStrength(teamB) - defenseStrength(teamA)) / RATING_GAP_DIVISOR, 0.25, 4.5);
+  const baseXgA = clamp(1.4 + ratingGapAdjustment(attackStrength(teamA) - defenseStrength(teamB)), 0.2, 6);
+  const baseXgB = clamp(1.4 + ratingGapAdjustment(attackStrength(teamB) - defenseStrength(teamA)), 0.2, 6);
 
   // Cards are decided before goals so a red card's timing can affect both
   // sides' remaining expected goals and exclude the sent-off player.
