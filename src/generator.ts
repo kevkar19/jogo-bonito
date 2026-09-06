@@ -1,23 +1,10 @@
-import { FormationRequirements, Player, PlayerPoolMode, Position } from './types';
-
-const FIRST_NAMES = [
-  'Marco', 'Diego', 'Kwame', 'Lucas', 'Noah', 'Yusuf', 'Mateo', 'Kenji',
-  'Liam', 'Rafael', 'Tomas', 'Idris', 'Owen', 'Jamal', 'Enzo', 'Hugo',
-  'Felix', 'Amir', 'Bruno', 'Milo', 'Theo', 'Nico', 'Kai', 'Dario',
-  'Sami', 'Leo', 'Axel', 'Rio', 'Vince', 'Zane',
-];
-
-const LAST_NAMES = [
-  'Almeida', 'Okafor', 'Bergman', 'Rossi', 'Novak', 'Diallo', 'Fischer',
-  'Bakker', 'Tanaka', 'Moreau', 'Haddad', 'Larsson', 'Costa', 'Weber',
-  'Adeyemi', 'Petrov', 'Sato', 'Reyes', 'Kovac', 'Dubois', 'Farrell',
-  'Kimura', 'Osei', 'Vidal', 'Hansen', 'Brunner', 'Mendes', 'Talbot',
-  'Ekwueme', 'Fontaine',
-];
+import { FormationRequirements, Player, Position } from './types';
 
 /**
- * Curated real-world players ("Icons") - a mix of retired legends and modern-era
- * stars, bucketed into this game's four positions with realistic ratings.
+ * The full curated roster - every player in the game is a real, named
+ * footballer bucketed into this game's four positions with realistic
+ * ratings. No fictional/generated players exist. Only Kevin Karengera (100)
+ * and Sam (99) hold those two ratings; everyone else tops out at 98.
  */
 const ICONS: Record<Position, { name: string; overall: number }[]> = {
   GK: [
@@ -33,6 +20,25 @@ const ICONS: Record<Position, { name: string; overall: number }[]> = {
     { name: 'Petr Cech', overall: 90 },
     { name: 'Marc-Andre ter Stegen', overall: 89 },
     { name: 'Jordan Pickford', overall: 85 },
+    // --- additions ---
+    { name: 'Oliver Kahn', overall: 90 },
+    { name: 'Gianluigi Donnarumma', overall: 88 },
+    { name: 'Mike Maignan', overall: 87 },
+    { name: 'Jose Luis Chilavert', overall: 86 },
+    { name: 'Hugo Lloris', overall: 85 },
+    { name: 'Yassine Bounou', overall: 84 },
+    { name: 'Keylor Navas', overall: 84 },
+    { name: 'Dida', overall: 83 },
+    { name: 'Julio Cesar', overall: 83 },
+    { name: 'Edouard Mendy', overall: 82 },
+    { name: 'Guillermo Ochoa', overall: 82 },
+    { name: 'Pepe Reina', overall: 82 },
+    { name: 'Victor Valdes', overall: 82 },
+    { name: 'Jens Lehmann', overall: 82 },
+    { name: 'Tim Howard', overall: 82 },
+    { name: 'Mark Schwarzer', overall: 81 },
+    { name: 'Sergio Romero', overall: 81 },
+    { name: 'David Ospina', overall: 80 },
   ],
   DEF: [
     { name: 'Franz Beckenbauer', overall: 93 },
@@ -55,6 +61,59 @@ const ICONS: Record<Position, { name: string; overall: number }[]> = {
     { name: 'William Saliba', overall: 86 },
     { name: 'Harry Maguire', overall: 83 },
     { name: 'John Arne Riise', overall: 85 },
+    // --- additions ---
+    { name: 'Philipp Lahm', overall: 92 },
+    { name: 'Cafu', overall: 90 },
+    { name: 'Roberto Carlos', overall: 90 },
+    { name: 'Rio Ferdinand', overall: 90 },
+    { name: 'John Terry', overall: 90 },
+    { name: 'Giorgio Chiellini', overall: 89 },
+    { name: 'Alessandro Nesta', overall: 89 },
+    { name: 'Pepe', overall: 88 },
+    { name: 'Javier Zanetti', overall: 88 },
+    { name: 'Laurent Blanc', overall: 88 },
+    { name: 'Marquinhos', overall: 87 },
+    { name: 'Raphael Varane', overall: 87 },
+    { name: 'Achraf Hakimi', overall: 87 },
+    { name: 'Dani Carvajal', overall: 87 },
+    { name: 'Leonardo Bonucci', overall: 87 },
+    { name: 'Diego Godin', overall: 86 },
+    { name: 'Theo Hernandez', overall: 86 },
+    { name: 'Jordi Alba', overall: 86 },
+    { name: 'Lucio', overall: 86 },
+    { name: 'Gianluca Zambrotta', overall: 86 },
+    { name: 'Rafael Marquez', overall: 85 },
+    { name: 'Maicon', overall: 85 },
+    { name: 'Mats Hummels', overall: 85 },
+    { name: 'Ivan Cordoba', overall: 84 },
+    { name: 'Walter Samuel', overall: 84 },
+    { name: 'Patrice Evra', overall: 84 },
+    { name: 'Andrea Barzagli', overall: 84 },
+    { name: 'Jerome Boateng', overall: 84 },
+    { name: 'Cesar Azpilicueta', overall: 83 },
+    { name: 'Nicolas Otamendi', overall: 83 },
+    { name: 'Kolo Toure', overall: 82 },
+    { name: 'William Gallas', overall: 82 },
+    { name: 'David Luiz', overall: 82 },
+    { name: 'Pablo Zabaleta', overall: 82 },
+    { name: 'Diego Lugano', overall: 81 },
+    { name: 'Eric Abidal', overall: 81 },
+    { name: 'Miranda', overall: 81 },
+    { name: 'Danilo', overall: 81 },
+    { name: 'Martin Demichelis', overall: 81 },
+    { name: 'Gabriel Heinze', overall: 81 },
+    { name: 'Claudio Suarez', overall: 80 },
+    { name: 'Gary Medel', overall: 80 },
+    { name: 'Laurent Koscielny', overall: 80 },
+    { name: 'Juan', overall: 80 },
+    { name: 'Alex Sandro', overall: 80 },
+    { name: 'Mehdi Mahdavikia', overall: 80 },
+    { name: 'Bacary Sagna', overall: 79 },
+    { name: 'Martin Caceres', overall: 78 },
+    { name: 'Per Mertesacker', overall: 78 },
+    { name: 'Emerson Royal', overall: 76 },
+    { name: 'DeAndre Yedlin', overall: 76 },
+    { name: 'Brett Emerton', overall: 76 },
   ],
   CM: [
     { name: 'Zinedine Zidane', overall: 96 },
@@ -84,7 +143,84 @@ const ICONS: Record<Position, { name: string; overall: number }[]> = {
     { name: 'Pedri', overall: 88 },
     { name: 'Declan Rice', overall: 87 },
     { name: 'Joshua Kimmich', overall: 90 },
+    { name: 'Casemiro', overall: 89 },
     { name: 'Sam', overall: 99 },
+    // --- additions ---
+    { name: 'Frank Lampard', overall: 93 },
+    { name: 'Wesley Sneijder', overall: 91 },
+    { name: 'Jude Bellingham', overall: 91 },
+    { name: 'Patrick Vieira', overall: 89 },
+    { name: 'Roy Keane', overall: 89 },
+    { name: 'Paul Scholes', overall: 89 },
+    { name: 'Clarence Seedorf', overall: 89 },
+    { name: 'Claude Makelele', overall: 89 },
+    { name: 'Mesut Ozil', overall: 88 },
+    { name: 'Cesc Fabregas', overall: 88 },
+    { name: 'Michael Ballack', overall: 88 },
+    { name: 'Arturo Vidal', overall: 88 },
+    { name: 'Xabi Alonso', overall: 87 },
+    { name: 'Juan Roman Riquelme', overall: 87 },
+    { name: 'Javier Mascherano', overall: 87 },
+    { name: 'Michael Essien', overall: 87 },
+    { name: 'Fernandinho', overall: 87 },
+    { name: 'Deco', overall: 87 },
+    { name: 'Rui Costa', overall: 87 },
+    { name: 'Marco Verratti', overall: 87 },
+    { name: 'Bastian Schweinsteiger', overall: 87 },
+    { name: 'Ilkay Gundogan', overall: 87 },
+    { name: 'James Rodriguez', overall: 86 },
+    { name: 'Gennaro Gattuso', overall: 86 },
+    { name: 'Diego Simeone', overall: 86 },
+    { name: 'Juan Sebastian Veron', overall: 85 },
+    { name: 'Isco', overall: 85 },
+    { name: 'Jorginho', overall: 85 },
+    { name: 'Daniele De Rossi', overall: 85 },
+    { name: 'Jay-Jay Okocha', overall: 84 },
+    { name: 'Santi Cazorla', overall: 84 },
+    { name: 'Juan Mata', overall: 84 },
+    { name: 'Gaizka Mendieta', overall: 84 },
+    { name: 'Philippe Coutinho', overall: 84 },
+    { name: 'Hidetoshi Nakata', overall: 84 },
+    { name: 'Park Ji-sung', overall: 84 },
+    { name: 'Esteban Cambiasso', overall: 83 },
+    { name: 'Blaise Matuidi', overall: 83 },
+    { name: 'Dimitri Payet', overall: 83 },
+    { name: 'Sami Khedira', overall: 83 },
+    { name: 'Mario Gotze', overall: 83 },
+    { name: 'Kai Havertz', overall: 83 },
+    { name: 'Ever Banega', overall: 83 },
+    { name: 'Franck Kessie', overall: 82 },
+    { name: 'Andres Guardado', overall: 82 },
+    { name: 'Shinji Kagawa', overall: 82 },
+    { name: 'Shunsuke Nakamura', overall: 82 },
+    { name: 'Diego', overall: 81 },
+    { name: 'Wilfred Ndidi', overall: 81 },
+    { name: 'Samir Nasri', overall: 81 },
+    { name: 'Pablo Aimar', overall: 81 },
+    { name: 'Keisuke Honda', overall: 81 },
+    { name: 'Marcos Senna', overall: 80 },
+    { name: 'David Albelda', overall: 80 },
+    { name: 'Oscar', overall: 80 },
+    { name: 'Paulinho', overall: 80 },
+    { name: 'Weston McKennie', overall: 80 },
+    { name: 'Makoto Hasebe', overall: 80 },
+    { name: 'Javier Pastore', overall: 80 },
+    { name: 'John Obi Mikel', overall: 79 },
+    { name: 'Lucas Leiva', overall: 79 },
+    { name: 'Tyler Adams', overall: 79 },
+    { name: 'Seydou Keita', overall: 78 },
+    { name: 'Fredy Guarin', overall: 78 },
+    { name: 'Moussa Sissoko', overall: 78 },
+    { name: 'Mikel Arteta', overall: 78 },
+    { name: 'Fred', overall: 78 },
+    { name: 'Renato Augusto', overall: 78 },
+    { name: 'Ki Sung-yueng', overall: 78 },
+    { name: 'Sulley Muntari', overall: 77 },
+    { name: 'Tanguy Ndombele', overall: 77 },
+    { name: 'Didier Zokora', overall: 76 },
+    { name: 'Amadou Haidara', overall: 76 },
+    { name: 'Ganso', overall: 76 },
+    { name: 'Jermaine Jones', overall: 74 },
   ],
   ST: [
     { name: 'Pele', overall: 98 },
@@ -113,52 +249,195 @@ const ICONS: Record<Position, { name: string; overall: number }[]> = {
     { name: 'Marcus Rashford', overall: 85 },
     { name: 'Ian Rush', overall: 92 },
     { name: 'Kevin Karengera', overall: 100 },
+    // --- additions ---
+    { name: 'Thierry Henry', overall: 96 },
+    { name: 'Karim Benzema', overall: 94 },
+    { name: 'Zlatan Ibrahimovic', overall: 94 },
+    { name: 'Dennis Bergkamp', overall: 94 },
+    { name: 'Wayne Rooney', overall: 93 },
+    { name: 'Eden Hazard', overall: 93 },
+    { name: 'David Villa', overall: 92 },
+    { name: "Samuel Eto'o", overall: 92 },
+    { name: 'Didier Drogba', overall: 92 },
+    { name: 'Arjen Robben', overall: 92 },
+    { name: 'Franck Ribery', overall: 92 },
+    { name: 'Thomas Muller', overall: 91 },
+    { name: 'Gareth Bale', overall: 91 },
+    { name: 'Angel Di Maria', overall: 91 },
+    { name: 'Carlos Tevez', overall: 91 },
+    { name: 'Gabriel Batistuta', overall: 91 },
+    { name: 'Luis Figo', overall: 90 },
+    { name: 'Rivaldo', overall: 90 },
+    { name: 'Eric Cantona', overall: 90 },
+    { name: 'Vinicius Junior', overall: 90 },
+    { name: 'Phil Foden', overall: 89 },
+    { name: 'Hugo Sanchez', overall: 89 },
+    { name: 'Fernando Torres', overall: 88 },
+    { name: 'Robin van Persie', overall: 88 },
+    { name: 'Francesco Totti', overall: 88 },
+    { name: 'Alessandro Del Piero', overall: 88 },
+    { name: 'Ruud van Nistelrooy', overall: 88 },
+    { name: 'George Weah', overall: 88 },
+    { name: 'Abedi Pele', overall: 88 },
+    { name: 'Edinson Cavani', overall: 88 },
+    { name: 'Christian Vieri', overall: 88 },
+    { name: 'Paulo Dybala', overall: 88 },
+    { name: 'Lautaro Martinez', overall: 88 },
+    { name: 'Diego Forlan', overall: 87 },
+    { name: 'Raheem Sterling', overall: 87 },
+    { name: 'Michael Owen', overall: 87 },
+    { name: 'Victor Osimhen', overall: 87 },
+    { name: 'Radamel Falcao', overall: 87 },
+    { name: 'Alexis Sanchez', overall: 87 },
+    { name: 'Adriano', overall: 87 },
+    { name: 'Gianluca Vialli', overall: 87 },
+    { name: 'Cha Bum-kun', overall: 87 },
+    { name: 'Hernan Crespo', overall: 86 },
+    { name: 'Miroslav Klose', overall: 86 },
+    { name: 'David Trezeguet', overall: 86 },
+    { name: 'Gonzalo Higuain', overall: 86 },
+    { name: 'Nicolas Anelka', overall: 86 },
+    { name: 'Raphinha', overall: 86 },
+    { name: 'Filippo Inzaghi', overall: 86 },
+    { name: 'Marco Reus', overall: 86 },
+    { name: 'Ali Daei', overall: 86 },
+    { name: 'Henrik Larsson', overall: 85 },
+    { name: 'Pierre-Emerick Aubameyang', overall: 85 },
+    { name: 'Ivan Zamorano', overall: 85 },
+    { name: 'Ousmane Dembele', overall: 85 },
+    { name: 'Rodrygo', overall: 85 },
+    { name: 'Leroy Sane', overall: 85 },
+    { name: 'Diego Milito', overall: 85 },
+    { name: 'Patrick Kluivert', overall: 84 },
+    { name: 'Olivier Giroud', overall: 84 },
+    { name: 'Kingsley Coman', overall: 84 },
+    { name: 'Pedro', overall: 84 },
+    { name: 'Lorenzo Insigne', overall: 84 },
+    { name: 'Ciro Immobile', overall: 84 },
+    { name: 'Antonio Cassano', overall: 84 },
+    { name: 'Antonio Di Natale', overall: 84 },
+    { name: 'Federico Chiesa', overall: 84 },
+    { name: 'Serge Gnabry', overall: 84 },
+    { name: 'Takefusa Kubo', overall: 84 },
+    { name: 'Nani', overall: 83 },
+    { name: 'Paolo Guerrero', overall: 83 },
+    { name: 'Alvaro Recoba', overall: 83 },
+    { name: 'Alvaro Morata', overall: 83 },
+    { name: 'Robinho', overall: 83 },
+    { name: 'Christian Pulisic', overall: 83 },
+    { name: 'Ricardo Quaresma', overall: 82 },
+    { name: 'Nwankwo Kanu', overall: 82 },
+    { name: 'Hakim Ziyech', overall: 82 },
+    { name: 'Carlos Vela', overall: 82 },
+    { name: 'Juan Cuadrado', overall: 82 },
+    { name: 'Claudio Pizarro', overall: 82 },
+    { name: 'Marcelo Salas', overall: 82 },
+    { name: 'Florent Malouda', overall: 82 },
+    { name: 'Fernando Morientes', overall: 82 },
+    { name: 'Dani Olmo', overall: 82 },
+    { name: 'Gabriel Jesus', overall: 82 },
+    { name: 'Douglas Costa', overall: 82 },
+    { name: 'Lukas Podolski', overall: 82 },
+    { name: 'Landon Donovan', overall: 82 },
+    { name: 'Harry Kewell', overall: 82 },
+    { name: 'Mauro Icardi', overall: 82 },
+    { name: 'Javier Hernandez', overall: 81 },
+    { name: 'Cuauhtemoc Blanco', overall: 81 },
+    { name: 'Hirving Lozano', overall: 81 },
+    { name: 'Jefferson Farfan', overall: 81 },
+    { name: 'Joaquin', overall: 81 },
+    { name: 'Jesus Navas', overall: 81 },
+    { name: 'Gerard Moreno', overall: 81 },
+    { name: 'Willian', overall: 81 },
+    { name: 'Hulk', overall: 81 },
+    { name: 'Richarlison', overall: 81 },
+    { name: 'Fabio Quagliarella', overall: 81 },
+    { name: 'Mario Balotelli', overall: 81 },
+    { name: 'Mario Gomez', overall: 81 },
+    { name: 'Timo Werner', overall: 81 },
+    { name: 'Tim Cahill', overall: 81 },
+    { name: 'Mark Viduka', overall: 81 },
+    { name: 'Angel Correa', overall: 81 },
+    { name: 'Asamoah Gyan', overall: 80 },
+    { name: 'Randal Kolo Muani', overall: 80 },
+    { name: 'Emmanuel Adebayor', overall: 80 },
+    { name: 'Javier Saviola', overall: 80 },
+    { name: 'Clint Dempsey', overall: 80 },
+    { name: 'Ezequiel Lavezzi', overall: 80 },
+    { name: 'Wilfried Zaha', overall: 79 },
+    { name: 'Samuel Chukwueze', overall: 79 },
+    { name: 'Carlos Bacca', overall: 79 },
+    { name: 'Salvatore Schillaci', overall: 79 },
+    { name: 'Salomon Kalou', overall: 78 },
+    { name: 'Obafemi Martins', overall: 78 },
+    { name: 'Bryan Ruiz', overall: 78 },
+    { name: 'Paulo Wanchope', overall: 78 },
+    { name: 'Jackson Martinez', overall: 78 },
+    { name: 'Alexandre Pato', overall: 78 },
+    { name: 'Stephan El Shaarawy', overall: 78 },
+    { name: 'Giovani Reyna', overall: 78 },
+    { name: 'Brian McBride', overall: 78 },
+    { name: 'Victor Moses', overall: 77 },
+    { name: 'Alex Iwobi', overall: 77 },
+    { name: 'Giovani dos Santos', overall: 77 },
+    { name: 'DaMarcus Beasley', overall: 77 },
+    { name: 'Victor Ikpeba', overall: 76 },
+    { name: 'Javier Aquino', overall: 76 },
+    { name: 'Bernard', overall: 76 },
+    { name: 'Ricardo Pepi', overall: 76 },
+    { name: 'Michael Olunga', overall: 75 },
+    { name: 'Jozy Altidore', overall: 75 },
+    { name: 'Cobi Jones', overall: 75 },
   ],
 };
 
-/**
- * Chance that any freshly generated player is swapped for an unused Icon of
- * the same position. Kept high (not 100%) since every Icon has a real photo
- * and the position pools are large (12-28 each) relative to the 2-4 needed
- * per game - a small residual chance still leaves room for a fictional
- * "filler" player without making them a common sight.
- */
-const ICON_CHANCE = 0.9;
-
 let usedNames: Set<string>;
-let usedIconNames: Set<string>;
 let idCounter: number;
 
 /** Resets per-game generator state. Must be called once at the start of each game. */
 export function resetGenerator() {
   usedNames = new Set();
-  usedIconNames = new Set();
   idCounter = 0;
 }
 
-function randomName(): string {
-  for (let attempt = 0; attempt < 20; attempt++) {
-    const first = FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)];
-    const last = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
-    const name = `${first} ${last}`;
-    if (!usedNames.has(name)) {
-      usedNames.add(name);
-      return name;
-    }
-  }
-  // Pool exhausted (unlikely with only 10 players) - allow a duplicate.
-  return `${FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)]} ${
-    LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)]
-  }`;
+function nextId(): string {
+  idCounter += 1;
+  return `p${idCounter}`;
 }
 
-/** Approximately normal rating via Box-Muller, mean 65, stddev 11, clamped to 1-99. */
-function randomOverall(): number {
-  const u1 = Math.random() || 1e-9;
-  const u2 = Math.random();
-  const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-  const rating = Math.round(65 + z * 11);
-  return Math.min(99, Math.max(1, rating));
+function pullPlayer(position: Position): Player {
+  const pool = ICONS[position];
+  const candidates = pool.filter((c) => !usedNames.has(c.name));
+  // Pool for this position is exhausted (needs more than the roster has) -
+  // vanishingly unlikely at ~80-140 players per position, but fall back to
+  // allowing a repeat rather than crashing.
+  const options = candidates.length > 0 ? candidates : pool;
+  const chosen = options[Math.floor(Math.random() * options.length)];
+  usedNames.add(chosen.name);
+  return {
+    id: nextId(),
+    name: chosen.name,
+    position,
+    overall: chosen.overall,
+    isIcon: true,
+  };
+}
+
+/**
+ * Builds the fixed auction pool for one game: exactly enough players of each
+ * position for both squads to fill completely per the chosen formation,
+ * shuffled into a random auction order. Resets generator state for a new game.
+ */
+export function generatePlayerPool(requirements: FormationRequirements): Player[] {
+  resetGenerator();
+  const pool: Player[] = [];
+  (Object.keys(requirements) as Position[]).forEach((position) => {
+    const countNeeded = requirements[position] * 2; // both squads
+    for (let i = 0; i < countNeeded; i++) {
+      pool.push(pullPlayer(position));
+    }
+  });
+  return shuffle(pool);
 }
 
 function shuffle<T>(items: T[]): T[] {
@@ -170,65 +449,7 @@ function shuffle<T>(items: T[]): T[] {
   return arr;
 }
 
-function nextId(): string {
-  idCounter += 1;
-  return `p${idCounter}`;
-}
-
-function tryPullIcon(position: Position, forceAttempt: boolean): Player | null {
-  if (!forceAttempt && Math.random() > ICON_CHANCE) return null;
-  const candidates = ICONS[position].filter((c) => !usedIconNames.has(c.name));
-  if (candidates.length === 0) return null;
-  const icon = candidates[Math.floor(Math.random() * candidates.length)];
-  usedIconNames.add(icon.name);
-  return {
-    id: nextId(),
-    name: icon.name,
-    position,
-    overall: icon.overall,
-    isIcon: true,
-  };
-}
-
-function makeRandomPlayer(position: Position): Player {
-  return {
-    id: nextId(),
-    name: randomName(),
-    position,
-    overall: randomOverall(),
-    isIcon: false,
-  };
-}
-
-function makePlayer(position: Position, playerPool: PlayerPoolMode): Player {
-  const iconsOnly = playerPool === 'iconsOnly';
-  // Icons-only mode always tries for a photographed Icon first; if that
-  // position's roster is ever exhausted this falls back to a fictional
-  // player rather than crashing or duplicating a name.
-  return tryPullIcon(position, iconsOnly) ?? makeRandomPlayer(position);
-}
-
-/**
- * Builds the fixed auction pool for one game: exactly enough players of each
- * position for both squads to fill completely per the chosen formation,
- * shuffled into a random auction order. Resets generator state for a new game.
- */
-export function generatePlayerPool(
-  requirements: FormationRequirements,
-  playerPool: PlayerPoolMode
-): Player[] {
-  resetGenerator();
-  const pool: Player[] = [];
-  (Object.keys(requirements) as Position[]).forEach((position) => {
-    const countNeeded = requirements[position] * 2; // both squads
-    for (let i = 0; i < countNeeded; i++) {
-      pool.push(makePlayer(position, playerPool));
-    }
-  });
-  return shuffle(pool);
-}
-
 /** Generates one fresh replacement player of the given position (e.g. after a double-pass skip). */
-export function generateReplacementPlayer(position: Position, playerPool: PlayerPoolMode): Player {
-  return makePlayer(position, playerPool);
+export function generateReplacementPlayer(position: Position): Player {
+  return pullPlayer(position);
 }

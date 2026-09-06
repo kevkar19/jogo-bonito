@@ -31,4 +31,3 @@ export const POSITION_AVATAR: Record<Position, { icon: keyof typeof Ionicons.gly
   ST: { icon: 'football', color: '#e0483e' },
 };
 
-export const ICON_AVATAR = { icon: 'trophy' as keyof typeof Ionicons.glyphMap, color: '#d4af37' };

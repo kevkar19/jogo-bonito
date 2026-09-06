@@ -36,7 +36,6 @@ export interface Team {
 }
 
 export type BiddingMode = 'auction' | 'draft' | 'sealed';
-export type PlayerPoolMode = 'all' | 'iconsOnly';
 export type EndMode = 'ovr' | 'matchSim';
 export type FormationId = 'classic' | 'balanced' | 'attack' | 'total';
 
@@ -50,7 +49,6 @@ export interface GameConfig {
   /** When true, hide every numeric overall rating until the Final Results screen. */
   hideRatings: boolean;
   biddingMode: BiddingMode;
-  playerPool: PlayerPoolMode;
   endMode: EndMode;
   formation: FormationId;
   /** Seconds allowed per bidding decision, or null for no timer. */

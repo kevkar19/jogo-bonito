@@ -1,13 +1,12 @@
 import Ionicons from '@expo/vector-icons/build/Ionicons';
 import { Image, StyleSheet, View } from 'react-native';
 import { Player } from '../types';
-import { ICON_AVATAR, POSITION_AVATAR } from '../avatars';
+import { POSITION_AVATAR } from '../avatars';
 import { ICON_PHOTOS } from '../iconPhotos';
 
 export default function PlayerAvatar({ player, size = 64 }: { player: Player; size?: number }) {
-  const spec = player.isIcon ? ICON_AVATAR : POSITION_AVATAR[player.position];
-  const backgroundColor = player.isIcon ? '#3a2f0b' : `${spec.color}22`;
-  const photo = player.isIcon ? ICON_PHOTOS[player.name] : undefined;
+  const posSpec = POSITION_AVATAR[player.position];
+  const photo = ICON_PHOTOS[player.name];
 
   return (
     <View
@@ -17,9 +16,9 @@ export default function PlayerAvatar({ player, size = 64 }: { player: Player; si
           width: size,
           height: size,
           borderRadius: size / 2,
-          backgroundColor,
-          borderColor: spec.color,
-          borderWidth: player.isIcon ? 3 : 2,
+          backgroundColor: `${posSpec.color}22`,
+          borderColor: posSpec.color,
+          borderWidth: 2,
         },
       ]}
     >
@@ -30,7 +29,10 @@ export default function PlayerAvatar({ player, size = 64 }: { player: Player; si
           resizeMode="cover"
         />
       ) : (
-        <Ionicons name={spec.icon} size={size * 0.5} color={spec.color} />
+        // Every player is a real named footballer, but not all have a
+        // photo - a generic person silhouette in the position's color reads
+        // as "real person, no picture" rather than a fictional filler.
+        <Ionicons name="person" size={size * 0.55} color={posSpec.color} />
       )}
     </View>
   );

@@ -87,11 +87,6 @@ export default function AuctionResultScreen({
 
   const compactCard = (
     <View style={styles.playerCard}>
-      {result.player.isIcon && (
-        <View style={styles.iconBadge}>
-          <Text style={styles.iconBadgeText}>⭐ ICON</Text>
-        </View>
-      )}
       <PlayerAvatar player={result.player} size={64} />
       <Text style={styles.playerName}>{result.player.name}</Text>
       <Text style={styles.playerPosition}>{POSITION_LABELS[result.player.position]}</Text>
@@ -182,14 +177,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     width: '100%',
   },
-  iconBadge: {
-    backgroundColor: '#d4af37',
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 3,
-    marginBottom: 10,
-  },
-  iconBadgeText: { color: '#3a2f0b', fontWeight: '800', fontSize: 11 },
   mysteryAvatar: {
     width: 64,
     height: 64,

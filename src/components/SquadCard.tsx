@@ -1,4 +1,3 @@
-import Ionicons from '@expo/vector-icons/build/Ionicons';
 import { StyleSheet, Text, View } from 'react-native';
 import { Player, Position, Team, squadTotalOverall } from '../types';
 import { colors } from '../theme';
@@ -24,7 +23,6 @@ function Row({
           <Text style={styles.playerName} numberOfLines={1}>
             {player.name}
           </Text>
-          {player.isIcon && <Ionicons name="trophy" size={12} color="#d4af37" />}
           <TierBadge overall={player.overall} size="sm" />
           {!hideRatings && <Text style={styles.overall}>{player.overall}</Text>}
         </>

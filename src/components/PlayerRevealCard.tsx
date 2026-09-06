@@ -13,7 +13,7 @@ import TierBadge from './TierBadge';
  * and the border color signals rarity tier at a glance.
  */
 export default function PlayerRevealCard({ player }: { player: Player }) {
-  const photo = player.isIcon ? ICON_PHOTOS[player.name] : undefined;
+  const photo = ICON_PHOTOS[player.name];
   const posSpec = POSITION_AVATAR[player.position];
   const tier = getRatingTier(player.overall);
   const tierColor = TIER_COLORS[tier];
@@ -27,8 +27,11 @@ export default function PlayerRevealCard({ player }: { player: Player }) {
         {photo ? (
           <Image source={photo} style={styles.photo} resizeMode="cover" />
         ) : (
+          // Every player is a real named footballer, but not all have a
+          // photo - a generic person silhouette reads as "real person, no
+          // picture" rather than a fictional filler.
           <View style={[styles.photo, styles.fallback, { backgroundColor: posSpec.color }]}>
-            <Ionicons name={posSpec.icon} size={110} color="rgba(255,255,255,0.35)" />
+            <Ionicons name="person" size={130} color="rgba(255,255,255,0.35)" />
           </View>
         )}
 
@@ -36,11 +39,6 @@ export default function PlayerRevealCard({ player }: { player: Player }) {
           <View style={[styles.positionBadge, { backgroundColor: colors.pitch }]}>
             <Text style={styles.positionBadgeText}>{player.position}</Text>
           </View>
-          {player.isIcon && (
-            <View style={styles.iconBadge}>
-              <Text style={styles.iconBadgeText}>⭐ ICON</Text>
-            </View>
-          )}
         </View>
 
         <LinearGradient
@@ -107,13 +105,6 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   positionBadgeText: { color: colors.textInverse, fontWeight: '800', fontSize: 13 },
-  iconBadge: {
-    backgroundColor: '#d4af37',
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-  },
-  iconBadgeText: { color: '#3a2f0b', fontWeight: '800', fontSize: 12 },
   scrim: {
     position: 'absolute',
     left: 0,

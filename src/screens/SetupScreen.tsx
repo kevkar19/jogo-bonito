@@ -17,7 +17,6 @@ import {
   FORMATIONS,
   FormationId,
   GameConfig,
-  PlayerPoolMode,
   POSITION_LABELS,
 } from '../types';
 import { colors, fonts } from '../theme';
@@ -48,11 +47,6 @@ const END_MODE_OPTIONS: { value: EndMode; label: string }[] = [
   { value: 'matchSim', label: 'Match Sim' },
 ];
 
-const POOL_OPTIONS: { value: PlayerPoolMode; label: string }[] = [
-  { value: 'all', label: 'All Players' },
-  { value: 'iconsOnly', label: 'Icons Only' },
-];
-
 export default function SetupScreen({
   onStart,
 }: {
@@ -66,7 +60,6 @@ export default function SetupScreen({
   const [incrementText, setIncrementText] = useState('5');
   const [hideRatings, setHideRatings] = useState(false);
   const [biddingMode, setBiddingMode] = useState<BiddingMode>('auction');
-  const [playerPool, setPlayerPool] = useState<PlayerPoolMode>('all');
   const [formation, setFormation] = useState<FormationId>('classic');
   const [endMode, setEndMode] = useState<EndMode>('ovr');
   const [timerChoice, setTimerChoice] = useState('off');
@@ -107,7 +100,6 @@ export default function SetupScreen({
       team2Avatar,
       hideRatings,
       biddingMode,
-      playerPool,
       endMode,
       formation,
       timerSeconds: timerChoice === 'off' ? null : parseInt(timerChoice, 10),
@@ -148,16 +140,6 @@ export default function SetupScreen({
             maxLength={20}
           />
           <AvatarPicker selected={team2Avatar} onSelect={setTeam2Avatar} />
-        </View>
-
-        <View style={styles.card}>
-          <Text style={styles.sectionLabel}>Player Pool</Text>
-          <SegmentedControl options={POOL_OPTIONS} value={playerPool} onChange={setPlayerPool} />
-          <Text style={styles.hint}>
-            {playerPool === 'iconsOnly'
-              ? 'Only the curated real-world Icons show up - every player has a photo.'
-              : 'A mix of curated Icons (with photos) and generated fictional players.'}
-          </Text>
         </View>
 
         <View style={styles.card}>

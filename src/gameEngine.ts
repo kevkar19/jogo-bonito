@@ -104,7 +104,6 @@ export function initialState(): GameState {
       team2Avatar: 'shield',
       hideRatings: false,
       biddingMode: 'auction',
-      playerPool: 'all',
       endMode: 'ovr',
       formation: 'classic',
       timerSeconds: null,
@@ -162,7 +161,7 @@ function resolveWin(
 /** Both sides declined to bid at all: discard the player and queue a same-position replacement. */
 function resolveSkip(state: GameState): GameState {
   const player = state.currentPlayer!;
-  const replacement = generateReplacementPlayer(player.position, state.config.playerPool);
+  const replacement = generateReplacementPlayer(player.position);
   return {
     ...state,
     phase: 'auctionResult',
@@ -265,7 +264,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'START_GAME': {
       const { config } = action;
       const requirements = FORMATIONS[config.formation].requirements;
-      const pool = generatePlayerPool(requirements, config.playerPool);
+      const pool = generatePlayerPool(requirements);
       const freshState: GameState = {
         ...initialState(),
         config,
